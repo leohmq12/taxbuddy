@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../splash_screens/signup_screen.dart';
+import '../splash_screens/home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -80,6 +81,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       onPressed: () {
                         // Handle login action
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen())
+                        );
                       },
                       child: const Text(
                         'Log In',
