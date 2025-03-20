@@ -52,10 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
+      debugPrint("🟡 Attempting login for: $email");
+
       var user = await _authService.authenticateUser(email, password, isLogin: true);
 
       if (user != null) {
-        debugPrint("✅ Login Successful for: $email");
+        debugPrint("✅ Login successful for: $email");
 
         if (mounted) {
           Navigator.pushReplacement(
@@ -67,15 +69,16 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _errorMessage = "Invalid email or password. Please try again.";
         });
-        debugPrint("❌ Login Failed: Invalid email or password.");
+        debugPrint("❌ Firebase returned NULL user object.");
       }
     } catch (e) {
       setState(() {
         _errorMessage = "Error: $e";
       });
-      debugPrint("❌ Login Error: $e");
+      debugPrint("❌ Firebase Authentication Error: $e");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
