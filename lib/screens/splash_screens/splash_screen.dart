@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../splash_screens/splash_screen1.dart'; // Import the next screen
+import 'package:shared_preferences/shared_preferences.dart';
+import '../splash_screens/splash_screen1.dart'; // Your existing onboarding screen
+import '../splash_screens/login_screen.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -14,16 +16,31 @@ class _SplashscreenState extends State<Splashscreen> {
   @override
   void initState() {
     super.initState();
+    _navigateBasedOnUserStatus(); // ✅ Start checking user status
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Timer(const Duration(seconds: 5), () {
-        if (mounted) {
+  /// ✅ **Check if user is opening the app for the first time**
+  Future<void> _navigateBasedOnUserStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isFirstTime = prefs.getBool('isFirstTime') ?? true; // Default to true
+
+    Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        if (isFirstTime) {
+          // 🔹 Show onboarding, then set flag to false
+          prefs.setBool('isFirstTime', false);
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const OnBoardingScreen()),
+            MaterialPageRoute(builder: (context) => const OnBoardingScreen()), // Your existing onboarding screen
+          );
+        } else {
+          // 🔹 User has already seen onboarding, go to LoginScreen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
-      });
+      }
     });
   }
 
