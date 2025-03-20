@@ -1,4 +1,6 @@
+import 'package:taxbuddy/backend/auth/auth.dart'; // Import AuthService
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -15,6 +17,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FocusNode _passwordFocus = FocusNode();
 
   bool _isPasswordVisible = false;
+  final AuthService _authService = AuthService(); // AuthService instance
 
   @override
   void initState() {
@@ -38,21 +41,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _updateUI() {
-    setState(() {}); // This will rebuild the UI when keyboard appears/disappears
+    setState(() {});
+  }
+
+  void _signUp() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please enter email and password")),
+      );
+      return;
+    }
+
+    User? user = await _authService.authenticateUser(email, password, isLogin: false);
+
+    if (user != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Sign Up Successful! Please log in.")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Sign Up Failed! Email may already exist.")),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Prevents keyboard overlap
+      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 50), // Adjust spacing
-              Center(child: Image.asset("assets/images/ls.png", height: 80)), // Logo
+              SizedBox(height: 50),
+              Center(child: Image.asset("assets/images/ls.png", height: 80)),
 
               SizedBox(height: 20),
               Center(
@@ -63,7 +90,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               SizedBox(height: 30),
 
-              // Name Field
               Text("Full Name"),
               TextField(
                 controller: _nameController,
@@ -75,7 +101,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               SizedBox(height: 20),
 
-              // Email Field
               Text("Email Address"),
               TextField(
                 controller: _emailController,
@@ -88,7 +113,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               SizedBox(height: 20),
 
-              // Password Field
               Text("Password"),
               TextField(
                 controller: _passwordController,
@@ -111,30 +135,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               SizedBox(height: 30),
 
-              // Sign Up Button
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle sign up
-                  },
+                  onPressed: _signUp,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
-                    backgroundColor: const Color(0xFF004B9C), // Blue background
+                    backgroundColor: const Color(0xFF004B9C),
                   ),
                   child: const Text(
                     "Sign Up",
-                    style: TextStyle(color: Colors.white), // Change text color to white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
 
               SizedBox(height: 10),
 
-              // Navigation to Log In
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pop(context); // Go back to login screen
+                    Navigator.pop(context);
                   },
                   child: Text(
                     "Already have an account? Sign In",

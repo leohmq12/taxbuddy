@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../splash_screens/signup_screen.dart';
 import '../splash_screens/home.dart';
+import 'package:taxbuddy/backend/auth/auth.dart'; // Import AuthService
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,11 +11,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _isPasswordVisible = false; // Track password visibility
+  bool _isPasswordVisible = false;
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService(); // ✅ Firebase AuthService instance
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -33,20 +36,58 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onFocusChange() {
-    setState(() {}); // Refresh UI when focus changes
+    setState(() {}); // Refresh UI on focus change
+  }
+
+  /// **🔹 Handle Login Action**
+  Future<void> _handleLogin() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = "Please enter both email and password.";
+      });
+      return;
+    }
+
+    try {
+      var user = await _authService.authenticateUser(email, password, isLogin: true);
+
+      if (user != null) {
+        debugPrint("✅ Login Successful for: $email");
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } else {
+        setState(() {
+          _errorMessage = "Invalid email or password. Please try again.";
+        });
+        debugPrint("❌ Login Failed: Invalid email or password.");
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Error: $e";
+      });
+      debugPrint("❌ Login Error: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true,  // Ensures UI adjusts with keyboard
+      resizeToAvoidBottomInset: true,
       body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard when tapping outside
+        onTap: () => FocusScope.of(context).unfocus(),
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              reverse: true, // Prevents UI overlap with keyboard
+              reverse: true,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
@@ -59,18 +100,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Center(
                       child: Text(
                         'Log In',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                     ),
                     const SizedBox(height: 30),
                     _buildTextField('Email Address', 'Enter your Email Address', false, _emailFocus, _emailController),
                     const SizedBox(height: 15),
                     _buildTextField('Password', 'Enter your Password', true, _passwordFocus, _passwordController),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
+
+                    // **🔴 Error Message (if any)**
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Center(
+                          child: Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+                        ),
+                      ),
+
+                    // **🔹 Login Button**
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF004B9C),
@@ -79,18 +127,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         minimumSize: const Size(double.infinity, 50),
                       ),
-                      onPressed: () {
-                        // Handle login action
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen())
-                        );
-                      },
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
+                      onPressed: _handleLogin, // ✅ Calls _handleLogin function
+                      child: const Text('Log In', style: TextStyle(color: Colors.white, fontSize: 16)),
                     ),
+
                     const SizedBox(height: 10),
                     Center(
                       child: TextButton(
@@ -100,10 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             MaterialPageRoute(builder: (context) => SignUpScreen()),
                           );
                         },
-                        child: const Text(
-                          "Don't have an account? Sign Up",
-                          style: TextStyle(color: Color(0xFF004B9C)),
-                        ),
+                        child: const Text("Don't have an account? Sign Up", style: TextStyle(color: Color(0xFF004B9C))),
                       ),
                     ),
                     Center(
@@ -111,10 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           // Navigate to Forgot Password
                         },
-                        child: const Text(
-                          'Forgot Password?',
-                          style: TextStyle(color: Color(0xFF004B9C)),
-                        ),
+                        child: const Text('Forgot Password?', style: TextStyle(color: Color(0xFF004B9C))),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -128,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// **Reusable Text Field with Password Toggle and Keyboard Handling**
+  /// **Reusable Text Field**
   Widget _buildTextField(String label, String hint, bool isPassword, FocusNode focusNode, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,16 +172,13 @@ class _LoginScreenState extends State<LoginScreen> {
         TextField(
           focusNode: focusNode,
           controller: controller,
-          obscureText: isPassword ? !_isPasswordVisible : false, // Toggle password visibility
+          obscureText: isPassword ? !_isPasswordVisible : false,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
             suffixIcon: isPassword
                 ? IconButton(
-              icon: Icon(
-                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                color: Colors.grey,
-              ),
+              icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.grey),
               onPressed: () {
                 setState(() {
                   _isPasswordVisible = !_isPasswordVisible;
