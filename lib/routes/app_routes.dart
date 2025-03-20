@@ -9,7 +9,7 @@ import '../screens/splash_screens/home.dart';
 import '../screens/splash_screens/tax_calculator.dart';
 import '../screens/splash_screens/settings.dart';
 import '../screens/splash_screens/profile.dart';
-import '../screens/splash_screens/splash_screen11.dart';
+import '../screens/splash_screens/chatscreen.dart';
 import '../screens/auth/login.dart';
 import '../screens/auth/signup.dart';
 

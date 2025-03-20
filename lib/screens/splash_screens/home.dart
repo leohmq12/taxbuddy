@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/settings.dart';
 import '../splash_screens/profile.dart';
+import '../splash_screens/chatscreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,11 +15,39 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0; // Tracks the active tab index
 
   final List<Widget> _screens = [
-    const HomeContent(), // Home Content
-    const TaxCalculatorScreen(), // Tax Calculator
-    Center(child: Text('Chat Screen')), // Placeholder for Chat
-    const ProfileScreen(), // Placeholder for Profile
-    const SettingsScreen(), // Placeholder for Settings
+    /// ✅ Home Screen with **AppBar**
+    Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF004B9C),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            const CircleAvatar(
+              backgroundImage: AssetImage('assets/images/image1.png'),
+              radius: 18,
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Tax Assistant',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontFamily: 'OakSans',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: const HomeContent(),
+    ),
+
+    /// ✅ Other Screens (No AppBar)
+    const TaxCalculatorScreen(),
+    const ChatScreen(),
+    const ProfileScreen(),
+    const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -42,29 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF004B9C),
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: Row(
-            children: [
-              const CircleAvatar(
-                backgroundImage: AssetImage('assets/images/image1.png'),
-                radius: 18,
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                'Tax Assistant',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontFamily: 'OakSans',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
         body: IndexedStack(
           index: _selectedIndex,
           children: _screens,

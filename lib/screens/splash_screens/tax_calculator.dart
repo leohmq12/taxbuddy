@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TaxCalculatorScreen extends StatefulWidget {
   const TaxCalculatorScreen({super.key});
@@ -16,6 +17,17 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue[900], // Dark blue app bar
+        title: Text(
+          "Tax Calculator",
+          style: GoogleFonts.urbanist(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),

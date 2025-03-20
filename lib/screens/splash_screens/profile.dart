@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,6 +14,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue[900], // Dark blue app bar
+        title: Text(
+          "Your Profile",
+          style: GoogleFonts.urbanist(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
       backgroundColor: Colors.grey[100], // Light gray background
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16), // Removed bottom padding
