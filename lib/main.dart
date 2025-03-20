@@ -10,11 +10,25 @@ import 'screens/splash_screens/login_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+
+  print("✅ Firebase Initialized");
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+  User? user = auth.currentUser;
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
+
+  print("🟢 User: ${user?.email}, IsFirstTime: $isFirstTime");
+
+  runApp(MyApp(user: user, isFirstTime: isFirstTime));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final User? user;
+  final bool isFirstTime;
+
+  const MyApp({super.key, required this.user, required this.isFirstTime});
 
   @override
   Widget build(BuildContext context) {
@@ -26,58 +40,56 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.jostTextTheme(),
       ),
 
-      // 🔹 Check if User is Already Logged In
-      home: const Splashscreen(),
+      // ✅ AuthChecker decides navigation
+      home: AuthChecker(isFirstTime: isFirstTime, user: user),
     );
   }
 }
+
 /// **🔹 AuthChecker Widget**
 /// Checks if user is new (show onboarding), else checks authentication
 class AuthChecker extends StatefulWidget {
-  const AuthChecker({super.key});
+  final bool isFirstTime;
+  final User? user;
+
+  const AuthChecker({super.key, required this.isFirstTime, required this.user});
 
   @override
   _AuthCheckerState createState() => _AuthCheckerState();
 }
 
 class _AuthCheckerState extends State<AuthChecker> {
-  bool _isNewUser = true; // Default to new user
+  late bool _isNewUser;
+  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _checkFirstTimeUser();
+    _isNewUser = widget.isFirstTime;
+    _currentUser = widget.user;
+    _checkUserAuthStatus();
   }
 
-  /// **🔍 Check if First-Time User**
-  Future<void> _checkFirstTimeUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? hasSeenOnboarding = prefs.getBool("hasSeenOnboarding");
-
-    setState(() {
-      _isNewUser = hasSeenOnboarding == null || !hasSeenOnboarding;
+  /// **🔍 Check Firebase Authentication State**
+  void _checkUserAuthStatus() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (mounted) {
+        setState(() {
+          _currentUser = user;
+        });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator()); // 🔄 Loading state
-        }
+    // ✅ If first-time user → Show onboarding
+    if (_isNewUser) return const Splashscreen();
 
-        if (_isNewUser) {
-          return const Splashscreen(); // 🚀 Show Onboarding First
-        }
+    // ✅ If logged in → Go to HomeScreen
+    if (_currentUser != null) return const HomeScreen();
 
-        if (snapshot.hasData) {
-          return const HomeScreen(); // ✅ User logged in, go to Home
-        }
-
-        return const LoginScreen(); // 🔑 Not logged in, show Login
-      },
-    );
+    // 🔑 If not logged in → Show LoginScreen
+    return const LoginScreen();
   }
 }
