@@ -1,0 +1,13 @@
+# Uncomment this line to define a global platform for your project
+# platform :ios, '11.0'
+
+target 'Runner' do
+    use_frameworks!
+    use_modular_headers!
+  
+    # Flutter Pods
+    flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+    pod 'Firebase/Analytics' # Adding Firebase Analytics
+    pod 'AlamoFire' # Adding AlamoFire for Networking
+  end
