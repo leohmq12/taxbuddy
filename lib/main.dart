@@ -19,7 +19,7 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
-  print("🟢 User: ${user?.email}, IsFirstTime: $isFirstTime");
+  print("🟢 User: \${user?.email}, IsFirstTime: \$isFirstTime");
 
   runApp(MyApp(user: user, isFirstTime: isFirstTime));
 }
@@ -39,9 +39,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         textTheme: GoogleFonts.jostTextTheme(),
       ),
-
-      // ✅ AuthChecker decides navigation
-      home: AuthChecker(isFirstTime: isFirstTime, user: user),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => AuthChecker(isFirstTime: isFirstTime, user: user),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }

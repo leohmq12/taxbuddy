@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:taxbuddy/backend/settings/settings_service.dart'; // Import the backend
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -9,15 +10,42 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final SettingsBackend _settingsBackend = SettingsBackend();
+
   bool isVoiceGuidanceOn = true;
   bool isDarkModeOn = false;
   bool isSimplifiedLanguageOn = true;
 
   @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    var settings = await _settingsBackend.loadSettings();
+    setState(() {
+      isVoiceGuidanceOn = settings['voiceGuidance']!;
+      isDarkModeOn = settings['darkMode']!;
+      isSimplifiedLanguageOn = settings['simplifiedLanguage']!;
+    });
+  }
+
+  Future<void> _updateSetting(String key, bool value) async {
+    await _settingsBackend.saveSetting(key, value);
+  }
+
+  Future<void> _logout() async {
+    await _settingsBackend.logout();
+    if (!mounted) return; // Ensure the widget is still in the tree
+    Navigator.pushReplacementNamed(context, '/login'); // Redirect to LoginScreen
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[900], // Dark blue app bar
+        backgroundColor: Colors.blue[900],
         title: Text(
           "Settings",
           style: GoogleFonts.urbanist(
@@ -27,49 +55,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
-      backgroundColor: Colors.grey[100], // Light gray background
+      backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo Section
               Container(
-                width: 201, // Adjust width based on your image
-                height: 124, // Adjust height as needed
-                child: Image.asset(
-                  'assets/images/ls.png', // Replace with your actual asset path
-                  fit: BoxFit.contain, // Ensures the image is not cropped
-                ),
+                width: 201,
+                height: 124,
+                child: Image.asset('assets/images/ls.png', fit: BoxFit.contain),
               ),
-
               SizedBox(height: 5),
-              Text(
-                "Version 1.0.0",
-                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-              ),
+              Text("Version 1.0.0", style: TextStyle(fontSize: 12, color: Colors.grey[500])),
               SizedBox(height: 20),
-
-              // App Settings Section
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "App Settings",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                child: Text("App Settings", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: 10),
-
-              // Settings Card
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black12, blurRadius: 5),
-                  ],
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
                 ),
                 child: Column(
                   children: [
@@ -81,6 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         setState(() {
                           isVoiceGuidanceOn = newValue;
                         });
+                        _updateSetting('voiceGuidance', newValue);
                       },
                     ),
                     Divider(),
@@ -92,6 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         setState(() {
                           isDarkModeOn = newValue;
                         });
+                        _updateSetting('darkMode', newValue);
                       },
                     ),
                     Divider(),
@@ -103,18 +116,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         setState(() {
                           isSimplifiedLanguageOn = newValue;
                         });
+                        _updateSetting('simplifiedLanguage', newValue);
                       },
                     ),
                   ],
                 ),
               ),
               SizedBox(height: 20),
-
-              // Log Out Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _logout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     padding: EdgeInsets.symmetric(vertical: 14),
@@ -130,7 +142,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Reusable Widget for Setting Options (Only Switch is Tappable)
   Widget _buildSettingTile({
     required String title,
     required String subtitle,
@@ -150,11 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
             ],
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged, // Only the switch is tappable
-            activeColor: Colors.blue,
-          ),
+          Switch(value: value, onChanged: onChanged, activeColor: Colors.blue),
         ],
       ),
     );

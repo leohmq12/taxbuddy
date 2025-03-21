@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:taxbuddy/backend/tax/tax_service.dart'; // Import backend
 
 class TaxCalculatorScreen extends StatefulWidget {
   const TaxCalculatorScreen({super.key});
@@ -13,6 +14,28 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
   final List<String> taxYears = ["2023/2024", "2024/2025", "2025/2026"];
   final TextEditingController annualIncomeController = TextEditingController();
   final TextEditingController selfEmploymentController = TextEditingController();
+
+  double incomeTax = 0;
+  double nationalInsurance = 0;
+  double vat = 0;
+
+  void calculateTaxes() {
+    double annualIncome = double.tryParse(annualIncomeController.text) ?? 0;
+    double selfEmploymentIncome = double.tryParse(selfEmploymentController.text) ?? 0;
+
+    TaxCalculator taxCalculator = TaxCalculator(
+      annualIncome: annualIncome,
+      selfEmploymentIncome: selfEmploymentIncome,
+      taxYear: selectedTaxYear, // Pass selected tax year
+    );
+
+    setState(() {
+      var breakdown = taxCalculator.getTaxBreakdown();
+      incomeTax = breakdown['Income Tax']!;
+      nationalInsurance = breakdown['National Insurance']!;
+      vat = breakdown['VAT']!;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +57,9 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// **Back Button**
-              Align(
+              const Align(
                 alignment: Alignment.centerLeft,
               ),
-
-              /// **Tax Calculator Form Box**
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -67,27 +87,16 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
                       ),
                     ),
                     const SizedBox(height: 15),
-
-                    /// **Annual Income Input Field**
                     _buildCurrencyTextField('Annual Income', annualIncomeController),
-
                     const SizedBox(height: 15),
-
-                    /// **Tax Year Dropdown**
                     _buildTaxYearDropdown(),
-
                     const SizedBox(height: 15),
-
-                    /// **Self-Employment Income Input Field**
                     _buildCurrencyTextField('Self-Employment Income', selfEmploymentController),
-
                     const SizedBox(height: 20),
-
-                    /// **Calculate Button**
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: calculateTaxes,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF004B9C),
                           padding: const EdgeInsets.symmetric(vertical: 15),
@@ -105,10 +114,7 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              /// **Estimated Tax Breakdown**
               _buildTaxBreakdown(),
             ],
           ),
@@ -117,7 +123,6 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
     );
   }
 
-  /// **🔹 Currency Text Field (With "£" Symbol)**
   Widget _buildCurrencyTextField(String label, TextEditingController controller) {
     return TextField(
       controller: controller,
@@ -132,7 +137,6 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
     );
   }
 
-  /// **🔹 Tax Year Dropdown**
   Widget _buildTaxYearDropdown() {
     return DropdownButtonFormField<String>(
       value: selectedTaxYear,
@@ -156,7 +160,6 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
     );
   }
 
-  /// **🔹 Tax Breakdown**
   Widget _buildTaxBreakdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,14 +174,13 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        _buildTaxRow('Income Tax', '£6,570'),
-        _buildTaxRow('National Insurance', '£3,750'),
-        _buildTaxRow('VAT (if registered)', '£4,200'),
+        _buildTaxRow('Income Tax', '£${incomeTax.toStringAsFixed(2)}'),
+        _buildTaxRow('National Insurance', '£${nationalInsurance.toStringAsFixed(2)}'),
+        _buildTaxRow('VAT (if registered)', '£${vat.toStringAsFixed(2)}'),
       ],
     );
   }
 
-  /// **🔹 Tax Row Widget**
   Widget _buildTaxRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
