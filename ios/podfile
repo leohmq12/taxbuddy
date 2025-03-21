@@ -1,13 +1,27 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '11.0'
+platform :ios, '11.0'  # Set the minimum iOS version to 11.0 or higher
 
 target 'Runner' do
-    use_frameworks!
-    use_modular_headers!
-  
-    # Flutter Pods
-    flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  use_frameworks!  # Required for some dependencies
+  use_modular_headers!
 
-    pod 'Firebase/Analytics' # Adding Firebase Analytics
-    pod 'AlamoFire' # Adding AlamoFire for Networking
-  end
+  # Automatically install all Flutter pods
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # Add Firebase pods
+  pod 'Firebase/Core'  # Required for firebase_core
+  pod 'Firebase/Auth'  # Required for firebase_auth
+  pod 'Firebase/Firestore'  # Required for cloud_firestore
+
+  # Add Google Sign-In pod
+  pod 'GoogleSignIn'  # Required for google_sign_in
+
+  # Add Flutter Local Notifications pod
+  pod 'flutter_local_notifications', :path => '.symlinks/plugins/flutter_local_notifications/ios'
+
+  # Add URL Launcher pod (if needed)
+  pod 'url_launcher_ios', :path => '.symlinks/plugins/url_launcher_ios/ios'
+
+  # Add other plugin-specific pods if required
+  # Example: Hive or shared_preferences do not require additional pods
+end
