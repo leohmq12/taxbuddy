@@ -36,10 +36,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter  # Required for Flutter testing
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.14.3
 
   # Add other dev dependencies here (if needed)
   # Example:
   # flutter_lints: ^2.0.0  # For linting and code analysis
+flutter_icons:
+  android: true
+  ios: true
+  image_path: assets/images/image1.png
 
 # Flutter-specific configuration
 flutter:
