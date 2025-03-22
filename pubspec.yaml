@@ -1,0 +1,59 @@
+name: taxbuddy
+description: A Flutter app for chatbot functionality.
+
+# Add the SDK constraint here
+environment:
+  sdk: '>=3.7.0 <4.0.0'  # Specify the minimum Dart SDK version
+
+# Dependencies for Flutter
+dependencies:
+  flutter:
+    sdk: flutter  # Required for Flutter apps
+
+  # Firebase dependencies
+  firebase_core: ^3.9.0  # Firebase Core
+  firebase_auth: ^5.3.4  # Firebase Authentication
+  cloud_firestore: ^5.6.5  # Cloud Firestore
+  google_sign_in: ^6.2.2 #Use the latest version
+  http: ^0.13.3
+  flutter_bloc: ^8.0.0
+  cupertino_icons: ^1.0.2
+  google_fonts: ^4.0.3
+  # Local notifications
+  flutter_local_notifications: ^15.1.1  # Local notifications
+  # URL launching
+  url_launcher: ^6.1.11  # Launch URLs
+  # Local storage
+  shared_preferences: ^2.2.2  # Shared preferences for simple key-value storage
+  hive: ^2.2.3  # Hive for local database
+  hive_flutter: ^1.1.0  # Hive integration with Flutter
+  audioplayers: ^5.2.1 #Text-to-Speech Output for Chatbot
+  flutter_dotenv: ^5.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter  # Required for Flutter testing
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.14.3
+
+  # Add other dev dependencies here (if needed)
+  # Example:
+  # flutter_lints: ^2.0.0  # For linting and code analysis
+flutter_icons:
+  android: true
+  ios: true
+  image_path: assets/images/image1.png
+
+# Flutter-specific configuration
+flutter:
+  assets:
+    - assets/images/
+  fonts:
+    - family: OakSans
+      fonts:
+        - asset: assets/fonts/OakSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/OakSans-Bold.ttf
+          weight: 700
+  uses-material-design: true  # Enables Material Design icons
+

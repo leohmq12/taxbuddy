@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "271314509016",
+    "project_id": "taxbuddy-2fd86",
+    "storage_bucket": "taxbuddy-2fd86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:271314509016:android:6bf726664b6efbe0298bad",
+        "android_client_info": {
+          "package_name": "com.example.taxbuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqSAJDU2V136nVQ9DZkT0THz-T2GYH4_I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
