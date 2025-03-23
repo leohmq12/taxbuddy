@@ -234,7 +234,7 @@ class HomeContent extends StatelessWidget {
           const SizedBox(height: 13),
           GestureDetector(
             onTap: () {
-              // Navigate to respective topic page (Future implementation)
+              SearchService.searchUKTax(title);
             },
             child: Row(
               children: const [

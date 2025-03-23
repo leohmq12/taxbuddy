@@ -23,7 +23,8 @@ class SearchService {
   static bool _isRelevantQuery(String query) {
     final List<String> allowedKeywords = [
       'self assessment', 'VAT', 'business tax', 'tax credits', 'PAYE',
-      'corporation tax', 'income tax', 'capital gains tax', 'inheritance tax'
+      'corporation tax', 'income tax', 'capital gains tax', 'inheritance tax',
+      'Self-Assessment', 'VAT Returns', 'Business Tax', 'Tax Credits'
     ];
 
     return allowedKeywords.any((keyword) => query.toLowerCase().contains(keyword));
