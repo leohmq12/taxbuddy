@@ -22,7 +22,7 @@ dependencies:
   # Local notifications
   flutter_local_notifications: ^15.1.1  # Local notifications
   # URL launching
-  url_launcher: ^6.1.11  # Launch URLs
+  url_launcher: ^6.1.14  # Launch URLs
   # Local storage
   shared_preferences: ^2.2.2  # Shared preferences for simple key-value storage
   hive: ^2.2.3  # Hive for local database

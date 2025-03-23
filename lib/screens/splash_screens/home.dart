@@ -3,6 +3,7 @@ import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/settings.dart';
 import '../splash_screens/profile.dart';
 import '../splash_screens/chatscreen.dart';
+import 'package:taxbuddy/backend/search/search_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -112,7 +113,7 @@ class HomeContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-            _buildSearchBar(),
+            _buildSearchBar(context),
             const SizedBox(height: 20),
             _buildSectionTitle('Featured Topics'),
             const SizedBox(height: 10),
@@ -129,7 +130,9 @@ class HomeContent extends StatelessWidget {
   }
 
   /// **🔍 Search Bar**
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
+    TextEditingController searchController = TextEditingController();
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
@@ -137,6 +140,7 @@ class HomeContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextField(
+        controller: searchController,
         style: TextStyle(
           color: Colors.grey[700],
           fontSize: 16,
@@ -150,8 +154,16 @@ class HomeContent extends StatelessWidget {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           prefixIcon: const Icon(Icons.mic, color: Color(0xFF49B3CD)),
-          suffixIcon: const Icon(Icons.search, color: Colors.grey),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.search, color: Colors.grey),
+            onPressed: () {
+              SearchService.searchUKTax(searchController.text);
+            },
+          ),
         ),
+        onSubmitted: (query) {
+          SearchService.searchUKTax(query);
+        },
       ),
     );
   }
@@ -277,4 +289,5 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
+
 }

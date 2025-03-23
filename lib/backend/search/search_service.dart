@@ -9,10 +9,12 @@ class SearchService {
       return;
     }
 
-    final Uri searchUrl = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}+UK+tax');
+    final Uri searchUrl = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query + " UK tax")}');
+
     if (await canLaunchUrl(searchUrl)) {
-      await launchUrl(searchUrl);
+      await launchUrl(searchUrl, mode: LaunchMode.externalApplication);
     } else {
+      print('Could not launch $searchUrl');
       throw 'Could not launch $searchUrl';
     }
   }
