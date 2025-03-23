@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
-import 'package:taxbuddy/flutter_dotenv/flutter_dotenv.dart';
 
 class ChatService {
-  final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? "";// Use a placeholder for testing
+  final String _apiKey = ""; // Replace with your actual API key
   final String _apiUrl = "https://api.openai.com/v1/chat/completions";
   final String _ttsUrl = "https://api.openai.com/v1/audio/speech";
 
@@ -21,7 +20,7 @@ class ChatService {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "model": "gpt-4",
+          "model": "gpt-4o-mini", // Use a valid model name
           "messages": [
             {"role": "system", "content": "You are an AI Tax Assistant specialized in UK taxes. Only respond to queries related to UK taxation laws, VAT, Self Assessment, expenses, and other tax-related topics in the UK."},
             {"role": "user", "content": userMessage},

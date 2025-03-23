@@ -6,12 +6,10 @@ import 'screens/splash_screens/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/splash_screens/splash_screen.dart';
 import 'screens/splash_screens/login_screen.dart';
-import 'package:taxbuddy/flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await dotenv.load();
 
   print("✅ Firebase Initialized");
 
