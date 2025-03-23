@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:taxbuddy/backend/settings/settings_service.dart'; // Import the backend
+import 'package:taxbuddy/backend/settings/settings_service.dart'; //
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -41,6 +41,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Navigator.pushReplacementNamed(context, '/login'); // Redirect to LoginScreen
   }
 
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Log Out"),
+          content: const Text("Are you sure you want to log out?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text("No", style: TextStyle(color: const Color(0xFF004B9C))),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _logout(); // Perform logout
+              },
+              child: const Text("Yes", style: TextStyle(color: const Color(0xFF004B9C))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,20 +94,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 height: 124,
                 child: Image.asset('assets/images/ls.png', fit: BoxFit.contain),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text("Version 1.0.0", style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-              SizedBox(height: 20),
-              Align(
+              const SizedBox(height: 20),
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Text("App Settings", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
                 ),
                 child: Column(
                   children: [
@@ -95,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _updateSetting('voiceGuidance', newValue);
                       },
                     ),
-                    Divider(),
+                    const Divider(),
                     _buildSettingTile(
                       title: "Dark Mode",
                       subtitle: "Use dark theme",
@@ -107,7 +134,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _updateSetting('darkMode', newValue);
                       },
                     ),
-                    Divider(),
+                    const Divider(),
                     _buildSettingTile(
                       title: "Simplified Language",
                       subtitle: "Avoid tax jargon",
@@ -122,17 +149,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _logout,
+                  onPressed: _showLogoutConfirmationDialog, // Show the logout prompt
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    backgroundColor: const Color(0xFF004B9C),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: Text("Log Out", style: TextStyle(color: Colors.white, fontSize: 16)),
+                  child: const Text("Log Out", style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
               ),
             ],
@@ -156,8 +183,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              SizedBox(height: 2),
+              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 2),
               Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
             ],
           ),
