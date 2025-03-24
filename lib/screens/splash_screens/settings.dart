@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:taxbuddy/backend/settings/settings_service.dart'; //
+import 'package:taxbuddy/backend/settings/settings_service.dart';
+import 'package:flutter_tts/flutter_tts.dart'; // Required for Text-to-Speech
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,6 +12,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsBackend _settingsBackend = SettingsBackend();
+  final FlutterTts flutterTts = FlutterTts(); // Initialize TTS
 
   bool isVoiceGuidanceOn = true;
   bool isDarkModeOn = false;
@@ -32,13 +34,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _updateSetting(String key, bool value) async {
-    await _settingsBackend.saveSetting(key, value);
+    if (key == 'voiceGuidance') {
+      await _settingsBackend.toggleVoiceGuidance(value);
+      if (value) {
+        await flutterTts.speak("Voice Guidance enabled");
+      } else {
+        await flutterTts.speak("Voice Guidance disabled");
+      }
+    } else if (key == 'simplifiedLanguage') {
+      await _settingsBackend.toggleSimplifiedLanguage(value);
+    } else {
+      await _settingsBackend.saveSetting(key, value);
+    }
   }
 
   Future<void> _logout() async {
     await _settingsBackend.logout();
-    if (!mounted) return; // Ensure the widget is still in the tree
-    Navigator.pushReplacementNamed(context, '/login'); // Redirect to LoginScreen
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   void _showLogoutConfirmationDialog() {
@@ -51,16 +64,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
-              child: const Text("No", style: TextStyle(color: const Color(0xFF004B9C))),
+              child: const Text("No", style: TextStyle(color: Color(0xFF004B9C))),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                _logout(); // Perform logout
+                Navigator.of(context).pop();
+                _logout();
               },
-              child: const Text("Yes", style: TextStyle(color: const Color(0xFF004B9C))),
+              child: const Text("Yes", style: TextStyle(color: Color(0xFF004B9C))),
             ),
           ],
         );
@@ -153,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _showLogoutConfirmationDialog, // Show the logout prompt
+                  onPressed: _showLogoutConfirmationDialog,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF004B9C),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),

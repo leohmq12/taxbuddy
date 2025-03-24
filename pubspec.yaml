@@ -28,7 +28,7 @@ dependencies:
   hive: ^2.2.3  # Hive for local database
   hive_flutter: ^1.1.0  # Hive integration with Flutter
   audioplayers: ^5.2.1 #Text-to-Speech Output for Chatbot
-  flutter_dotenv: ^5.2.1
+  flutter_tts: ^3.7.0 #Voice Guidance
 
 dev_dependencies:
   flutter_test:

@@ -99,7 +99,8 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
                         onPressed: calculateTaxes,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF004B9C),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          minimumSize: const Size(double.infinity, 50),
                         ),
                         child: const Text(
                           'Calculate Taxes',

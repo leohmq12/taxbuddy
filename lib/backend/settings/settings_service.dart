@@ -1,7 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class SettingsBackend {
+  final FlutterTts _flutterTts = FlutterTts();
+
+  /// Load saved settings
   Future<Map<String, bool>> loadSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return {
@@ -11,12 +15,34 @@ class SettingsBackend {
     };
   }
 
+  /// Save a setting persistently
   Future<void> saveSetting(String key, bool value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
   }
 
+  /// Logout function
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
+  }
+
+  /// Enable or disable Voice Guidance (TTS)
+  Future<void> toggleVoiceGuidance(bool isEnabled) async {
+    await saveSetting('voiceGuidance', isEnabled);
+    if (isEnabled) {
+      await _flutterTts.speak("Voice Guidance is now enabled.");
+    } else {
+      await _flutterTts.speak("Voice Guidance is now disabled.");
+    }
+  }
+
+  /// Enable or disable Simplified Language mode
+  Future<void> toggleSimplifiedLanguage(bool isEnabled) async {
+    await saveSetting('simplifiedLanguage', isEnabled);
+    if (isEnabled) {
+      await _flutterTts.speak("Simplified Language mode activated.");
+    } else {
+      await _flutterTts.speak("Simplified Language mode deactivated.");
+    }
   }
 }

@@ -282,7 +282,7 @@ class HomeContent extends StatelessWidget {
           ),
           SizedBox(height: 6),
           Text(
-            'Self Assessment deadline: 31 January',
+            'Self Assessment Deadline: 31 January',
             style: TextStyle(fontSize: 14, color: Color(0xFF49B3CD)),
           ),
         ],
