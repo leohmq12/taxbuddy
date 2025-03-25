@@ -3,6 +3,7 @@ import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/settings.dart';
 import '../splash_screens/profile.dart';
 import '../splash_screens/chatscreen.dart';
+import '../splash_screens/learn_screen.dart';
 import 'package:taxbuddy/backend/search/search_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,14 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF004B9C),
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Row(
+        title: const Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               backgroundImage: AssetImage('assets/images/image1.png'),
               radius: 18,
             ),
-            const SizedBox(width: 10),
-            const Text(
+            SizedBox(width: 10),
+            Text(
               'Tax Assistant',
               style: TextStyle(
                 color: Colors.white,
@@ -117,7 +118,7 @@ class HomeContent extends StatelessWidget {
             const SizedBox(height: 20),
             _buildSectionTitle('Featured Topics'),
             const SizedBox(height: 10),
-            _buildFeaturedTopics(),
+            _buildFeaturedTopics(context),
             const SizedBox(height: 20),
             _buildSectionTitle('Recent Activity'),
             const SizedBox(height: 10),
@@ -182,7 +183,7 @@ class HomeContent extends StatelessWidget {
   }
 
   /// **📚 Featured Topics**
-  Widget _buildFeaturedTopics() {
+  Widget _buildFeaturedTopics(BuildContext context) {
     List<Map<String, String>> topics = [
       {'title': 'Self-Assessment'},
       {'title': 'VAT Returns'},
@@ -201,13 +202,13 @@ class HomeContent extends StatelessWidget {
       ),
       itemCount: topics.length,
       itemBuilder: (context, index) {
-        return _buildTopicCard(topics[index]['title']!);
+        return _buildTopicCard(context, topics[index]['title']!);
       },
     );
   }
 
   /// **📌 Topic Card with "Learn >" Button**
-  Widget _buildTopicCard(String title) {
+  Widget _buildTopicCard(BuildContext context, String title) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -234,10 +235,15 @@ class HomeContent extends StatelessWidget {
           const SizedBox(height: 13),
           GestureDetector(
             onTap: () {
-              SearchService.searchUKTax(title);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TaxAssistantScreen(topic: title),
+                ),
+              );
             },
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Text(
                   'Learn',
                   style: TextStyle(
@@ -256,6 +262,8 @@ class HomeContent extends StatelessWidget {
     );
   }
 
+
+
   /// **🕒 Recent Activity**
   Widget _buildRecentActivityCard() {
     return Container(
@@ -268,9 +276,9 @@ class HomeContent extends StatelessWidget {
               color: Colors.grey.withAlpha(50), blurRadius: 5, spreadRadius: 2),
         ],
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Text(
             'Tax Deadline Reminder',
             style: TextStyle(

@@ -20,7 +20,11 @@ class SettingsBackend {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
   }
-
+  Future<bool> getSetting(String key) async {
+    // Retrieve setting from storage, assuming you're using SharedPreferences or another storage method
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(key) ?? false;
+  }
   /// Logout function
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
@@ -39,10 +43,14 @@ class SettingsBackend {
   /// Enable or disable Simplified Language mode
   Future<void> toggleSimplifiedLanguage(bool isEnabled) async {
     await saveSetting('simplifiedLanguage', isEnabled);
-    if (isEnabled) {
-      await _flutterTts.speak("Simplified Language mode activated.");
-    } else {
-      await _flutterTts.speak("Simplified Language mode deactivated.");
+    // Retrieve Voice Guidance setting before speaking
+    bool isVoiceGuidanceEnabled = await getSetting('voiceGuidance');
+    if (isVoiceGuidanceEnabled) {
+      if (isEnabled) {
+        await _flutterTts.speak("Simplified Language mode activated.");
+      } else {
+        await _flutterTts.speak("Simplified Language mode deactivated.");
+      }
     }
   }
 }
