@@ -5,6 +5,7 @@ import '../splash_screens/profile.dart';
 import '../splash_screens/chatscreen.dart';
 import '../splash_screens/learn_screen.dart';
 import 'package:taxbuddy/backend/search/search_service.dart';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,7 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
           });
           return false;
         }
-        return true; // Allow exiting the app when on Home tab
+        SystemNavigator.pop();
+        return false; // Prevents the app to go back to splash screen
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -290,7 +292,7 @@ class HomeContent extends StatelessWidget {
           ),
           SizedBox(height: 6),
           Text(
-            'Self Assessment Deadline: 31 January',
+            'Self Assessment Deadline: 31 October',
             style: TextStyle(fontSize: 14, color: Color(0xFF49B3CD)),
           ),
         ],

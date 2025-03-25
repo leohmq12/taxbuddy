@@ -6,9 +6,16 @@ import 'screens/splash_screens/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/splash_screens/splash_screen.dart';
 import 'screens/splash_screens/login_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try{
+    await dotenv.load(fileName: ".env");
+    print ("✅ .env file loaded successfully");
+  } catch (e) {
+    print ("❌ Error loading .env file: $e");
+  }
   await Firebase.initializeApp();
 
   print("✅ Firebase Initialized");

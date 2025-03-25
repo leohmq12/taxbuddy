@@ -2,6 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:taxbuddy/backend/chat_ai/chat_service.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../splash_screens/home.dart';
+import '../splash_screens/tax_calculator.dart';
+import '../splash_screens/settings.dart';
+import '../splash_screens/chatscreen.dart';
+import '../splash_screens/profile.dart';
 
 class TaxAssistantScreen extends StatefulWidget {
   final String topic;
@@ -35,13 +40,16 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
   }
 
   Future<void> _fetchContent() async {
-    String aiGeneratedContent = await _chatservice.fetchTaxContentFromAI(widget.topic);
+    String aiGeneratedContent = await _chatservice.fetchTaxContentFromAI(
+        widget.topic);
     setState(() {
       content = aiGeneratedContent;
     });
 
     // Estimate duration based on word count
-    int estimatedDuration = (aiGeneratedContent.split(" ").length / 3).round();
+    int estimatedDuration = (aiGeneratedContent
+        .split(" ")
+        .length / 3).round();
     setState(() {
       totalSeconds = estimatedDuration;
     });
@@ -112,18 +120,21 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                          icon: Icon(isPlaying ? Icons.pause : Icons
+                              .play_arrow),
                           onPressed: _togglePlayback,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text("${_formatTime(currentSeconds)} / ${_formatTime(totalSeconds)}"),
+                          child: Text("${_formatTime(
+                              currentSeconds)} / ${_formatTime(totalSeconds)}"),
                         ),
                         const Icon(Icons.volume_up),
                       ],
                     ),
                     Align(
-                      alignment: Alignment.centerLeft, // Align button to the left
+                      alignment: Alignment.centerLeft,
+                      // Align button to the left
                       child: ElevatedButton(
                         onPressed: () {},
                         child: const Text("Simplify Jargon"),
@@ -136,7 +147,10 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: 100,
-                  maxHeight: MediaQuery.of(context).size.height * 0.5, // Limits content height
+                  maxHeight: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.5, // Limits content height
                 ),
                 child: SingleChildScrollView(
                   child: Text(content, style: const TextStyle(fontSize: 16)),
@@ -146,6 +160,48 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        // Set index according to your tabs
+        onTap: (index) {
+          // Navigate to other screens accordingly
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()));
+              break;
+            case 1:
+              Navigator.pushReplacement(context, MaterialPageRoute(
+                  builder: (_) => const TaxCalculatorScreen()));
+              break;
+            case 2:
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const ChatScreen()));
+              break;
+            case 3:
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()));
+              break;
+            case 4:
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              break;
+          }
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF004B9C),
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calculate), label: 'Calculator'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
+        ],
+      ),
     );
   }
-}
+  }
+

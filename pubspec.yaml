@@ -30,6 +30,7 @@ dependencies:
   audioplayers: ^5.2.1 #Text-to-Speech Output for Chatbot
   flutter_tts: ^3.7.0 #Voice Guidance
   flutter_markdown: ^0.7.6+2
+  flutter_dotenv: ^5.1.0 #for storing apikey
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +50,7 @@ flutter_icons:
 flutter:
   assets:
     - assets/images/
+    - .env
   fonts:
     - family: OakSans
       fonts:

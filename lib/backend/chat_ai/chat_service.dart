@@ -1,17 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:typed_data';
-
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ChatService {
-  final String _apiKey = ""; // Replace with your actual API key
+  final String _apiKey = dotenv.env['API_KEY'] ?? ""; // Load API key from .env
   final String _apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+
+  ChatService() {
+    if (_apiKey.isEmpty) {
+      print("Error: API Key is missing. Check .env file.");
+    }
+  }
 
   Future<String> getResponse(String userMessage) async {
     if (!_isTaxRelated(userMessage)) {
       return "I can only assist with UK tax-related queries. Please ask about taxes in the UK.";
     }
-  
-
     return await _fetchAIResponse(userMessage);
   }
 
@@ -36,7 +40,7 @@ class ChatService {
             },
             {"role": "user", "content": query},
           ],
-          "max_tokens": 700,
+          "max_tokens": 1000,
         }),
       );
 

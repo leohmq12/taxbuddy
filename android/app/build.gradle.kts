@@ -1,3 +1,5 @@
+import java.util.Properties
+import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,6 +7,11 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
 }
+
+val localProperties = Properties()
+localProperties.load(FileInputStream(rootProject.file("local.properties")))
+
+val apiKey: String = localProperties.getProperty("apiKey") ?: ""
 
 android {
 
@@ -31,6 +38,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        manifestPlaceholders["API KEY"] = apiKey
     }
 
     buildTypes {

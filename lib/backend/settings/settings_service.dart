@@ -5,7 +5,17 @@ import 'package:flutter_tts/flutter_tts.dart';
 class SettingsBackend {
   final FlutterTts _flutterTts = FlutterTts();
 
-  /// Load saved settings
+  /// ✅ Constructor ensures UK English TTS is set when the class is initialized.
+  SettingsBackend() {
+    _initializeTTS();
+  }
+
+  /// 🎙 Initialize FlutterTTS with UK English (en-GB)
+  Future<void> _initializeTTS() async {
+    await _flutterTts.setLanguage("en-GB"); // 🇬🇧 British English
+  }
+
+  /// 🔹 Load saved settings from SharedPreferences
   Future<Map<String, bool>> loadSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return {
@@ -15,22 +25,24 @@ class SettingsBackend {
     };
   }
 
-  /// Save a setting persistently
+  /// 🔹 Save a setting persistently
   Future<void> saveSetting(String key, bool value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
   }
+
+  /// 🔹 Retrieve a specific setting
   Future<bool> getSetting(String key) async {
-    // Retrieve setting from storage, assuming you're using SharedPreferences or another storage method
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool(key) ?? false;
   }
-  /// Logout function
+
+  /// 🔹 Logout function (Firebase Authentication)
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
   }
 
-  /// Enable or disable Voice Guidance (TTS)
+  /// 🔹 Enable or disable Voice Guidance (TTS)
   Future<void> toggleVoiceGuidance(bool isEnabled) async {
     await saveSetting('voiceGuidance', isEnabled);
     if (isEnabled) {
@@ -40,10 +52,11 @@ class SettingsBackend {
     }
   }
 
-  /// Enable or disable Simplified Language mode
+  /// 🔹 Enable or disable Simplified Language mode
   Future<void> toggleSimplifiedLanguage(bool isEnabled) async {
     await saveSetting('simplifiedLanguage', isEnabled);
-    // Retrieve Voice Guidance setting before speaking
+
+    // ✅ Check if Voice Guidance is enabled before speaking
     bool isVoiceGuidanceEnabled = await getSetting('voiceGuidance');
     if (isVoiceGuidanceEnabled) {
       if (isEnabled) {
