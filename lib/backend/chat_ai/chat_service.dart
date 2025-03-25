@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
 class ChatService {
-  final String _apiKey = "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"; // Replace with your actual API key
+  final String _apiKey = ""; // Replace with your actual API key
   final String _apiUrl = "https://openrouter.ai/api/v1/chat/completions";
   final String _ttsUrl = "https://api.openai.com/v1/audio/speech";
 
