@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ChatService {
   final String _apiKey = dotenv.env['API_KEY'] ?? ""; // Load API key from .env
   final String _apiUrl = "https://openrouter.ai/api/v1/chat/completions";
@@ -13,9 +14,6 @@ class ChatService {
   }
 
   Future<String> getResponse(String userMessage) async {
-    if (!_isTaxRelated(userMessage)) {
-      return "I can only assist with UK tax-related queries. Please ask about taxes in the UK.";
-    }
     return await _fetchAIResponse(userMessage);
   }
 
@@ -36,7 +34,7 @@ class ChatService {
           "messages": [
             {
               "role": "system",
-              "content": "You are an AI Tax Assistant specialized in UK taxes. Only respond to queries related to UK taxation laws, VAT, Self Assessment, expenses, and other tax-related topics in the UK."
+              "content": "You are an AI Tax Assistant with expertise in global and regional tax regulations. Provide accurate and comprehensive responses on all tax-related topics, including personal and corporate taxes, VAT, compliance, deductions, international taxation, financial planning, and legal tax frameworks."
             },
             {"role": "user", "content": query},
           ],
@@ -59,13 +57,6 @@ class ChatService {
       print("Exception: $e");
       return "Error: Something went wrong. Please check your connection.";
     }
-  }
-
-  bool _isTaxRelated(String query) {
-    List<String> keywords = [
-      "tax", "VAT", "HMRC", "Self Assessment", "income tax", "corporation tax", "capital gains tax", "National Insurance", "tax return"
-    ];
-    return keywords.any((word) => query.toLowerCase().contains(word));
   }
 
   Future<Uint8List?> getSpeech(String text) async {

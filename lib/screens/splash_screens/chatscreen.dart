@@ -154,14 +154,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildInputArea() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.grey[200],
+      color: Colors.grey[50],
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: _textController,
               decoration: InputDecoration(
-                hintText: "Ask about UK taxes...",
+                hintText: "Send message...",
                 fillColor: Colors.white,
                 filled: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
