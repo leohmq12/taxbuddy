@@ -23,6 +23,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final AuthService _authService = AuthService(); // AuthService instance
 
   bool? _signUpResult; // Null initially, true if successful, false if failed
+  bool _isVerificationSent = false; // Track if verification email is sent
+  String? _message; // Store message for errors/success
 
   @override
   void initState() {
@@ -54,17 +56,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter email and password")),
-      );
+      setState(() {
+        _message = "Please enter email and password";
+      });
       return;
     }
 
     User? user = await _authService.authenticateUser(email, password, isLogin: false);
 
-    setState(() {
-      _signUpResult = user != null; // true if signup successful, false otherwise
-    });
+    if (user != null) {
+      // Send email verification
+      await user.sendEmailVerification();
+
+      setState(() {
+        _signUpResult = true;
+        _isVerificationSent = true;
+        _message = "Verification email sent! Please check your inbox.";
+      });
+    } else {
+      setState(() {
+        _signUpResult = false;
+        _message = "Sign Up Failed! Email may already exist.";
+      });
+    }
   }
 
   @override
@@ -149,6 +163,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
 
+              if (_message != null) ...[
+                const SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    _message!,
+                    style: TextStyle(
+                      color: _signUpResult == true ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 10),
 
               Center(
@@ -164,43 +192,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 20),
 
-              // SIGNUP RESULT MESSAGE AND BUTTON
-              if (_signUpResult != null) ...[
-                const SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    _signUpResult!
-                        ? "Sign Up Successful! Please Login."
-                        : "Sign Up Failed! Email may already exist.",
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 10),
+              if (_signUpResult == true)
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_signUpResult!) {
-                        // If successful, navigate to login screen
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()),
-                        );
-                      } else {
-                        // If failed, reset the state to allow retry
-                        setState(() {
-                          _signUpResult = null;
-                        });
-                      }
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      backgroundColor: const Color(0xFF004B9C),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: Text(_signUpResult! ? "Go Back to Login" : "Try Again"),
+                    child: const Text("Go to Login", style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
-              ],
-            ],
+                )],
           ),
         ),
       ),

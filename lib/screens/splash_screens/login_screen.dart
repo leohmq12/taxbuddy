@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {}); // Refresh UI on focus change
   }
 
-  /// **🔹 Handle Login Action**
+  /// **🔹 Handle Login Action with Verification Check**
   Future<void> _handleLogin() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -57,8 +57,15 @@ class _LoginScreenState extends State<LoginScreen> {
       var user = await _authService.authenticateUser(email, password, isLogin: true);
 
       if (user != null) {
-        debugPrint("✅ Login successful for: $email");
+        if (!user.emailVerified) {
+          setState(() {
+            _errorMessage = "Email not verified. Please check your inbox and verify.";
+          });
+          debugPrint("❌ Email not verified for: $email");
+          return;
+        }
 
+        debugPrint("✅ Login successful for: $email");
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -78,7 +85,6 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint("❌ Firebase Authentication Error: $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 15),
                     _buildTextField('Password', 'Enter your Password', true, _passwordFocus, _passwordController),
                     const SizedBox(height: 10),
-
-                    // **🔴 Error Message (if any)**
                     if (_errorMessage.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10),
@@ -120,8 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Text(_errorMessage, style: const TextStyle(color: Colors.red)),
                         ),
                       ),
-
-                    // **🔹 Login Button**
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF004B9C),
@@ -133,7 +135,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _handleLogin, // ✅ Calls _handleLogin function
                       child: const Text('Log In', style: TextStyle(color: Colors.white, fontSize: 16)),
                     ),
-
                     const SizedBox(height: 10),
                     Center(
                       child: TextButton(
