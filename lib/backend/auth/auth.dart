@@ -22,4 +22,14 @@ class AuthService {
       return null; // Return null if authentication fails
     }
   }
+
+  /// **🔹 Reset Password**
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      print("❌ Password Reset Error: $e");
+      throw e;
+    }
+  }
 }
