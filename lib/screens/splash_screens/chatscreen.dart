@@ -69,18 +69,28 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue[900],
-        title: Text(
-          "AI Tax Assistant",
-          style: GoogleFonts.urbanist(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        automaticallyImplyLeading: false, // Removes the back button
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/images/image1.png'),
+              radius: 18,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "AI Tax Assistant",
+              style: GoogleFonts.urbanist(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
+
       body: Column(
         children: [
           Expanded(

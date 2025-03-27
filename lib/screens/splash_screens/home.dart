@@ -15,10 +15,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // Tracks the active tab index
+  int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    /// ✅ Home Screen with **AppBar**
     Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF004B9C),
@@ -45,8 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: const HomeContent(),
     ),
-
-    /// ✅ Other Screens (No AppBar)
     const TaxCalculatorScreen(),
     const ChatScreen(),
     const ProfileScreen(),
@@ -64,14 +61,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return WillPopScope(
       onWillPop: () async {
         if (_selectedIndex != 0) {
-          // If not on the home tab, navigate back to Home instead of exiting
           setState(() {
             _selectedIndex = 0;
           });
           return false;
         }
         SystemNavigator.pop();
-        return false; // Prevents the app to go back to splash screen
+        return false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -84,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// **🔹 Bottom Navigation Bar**
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
@@ -103,36 +98,41 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// **🏠 Home Content (Separated for Better Management)**
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            _buildSearchBar(context),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Featured Topics'),
-            const SizedBox(height: 10),
-            _buildFeaturedTopics(context),
-            const SizedBox(height: 20),
-            _buildSectionTitle('Recent Activity'),
-            const SizedBox(height: 10),
-            _buildRecentActivityCard(),
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery
+              .of(context)
+              .size
+              .width * 0.05),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                _buildSearchBar(context),
+                const SizedBox(height: 20),
+                _buildSectionTitle('Featured Topics'),
+                const SizedBox(height: 10),
+                _buildFeaturedTopics(context),
+                const SizedBox(height: 20),
+                _buildSectionTitle('Recent Activity'),
+                const SizedBox(height: 10),
+                _buildRecentActivityCard(),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  /// **🔍 Search Bar**
   Widget _buildSearchBar(BuildContext context) {
     TextEditingController searchController = TextEditingController();
 
@@ -144,16 +144,8 @@ class HomeContent extends StatelessWidget {
       ),
       child: TextField(
         controller: searchController,
-        style: TextStyle(
-          color: Colors.grey[700],
-          fontSize: 16,
-        ),
         decoration: InputDecoration(
           hintText: 'Search UK tax topics or ask a question',
-          hintStyle: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           prefixIcon: const Icon(Icons.mic, color: Color(0xFF49B3CD)),
@@ -171,7 +163,26 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  /// **📌 Section Titles**
+  Widget _buildFeaturedTopics(BuildContext context) {
+    List<String> topics = ['Self-Assessment', 'VAT Returns', 'Business Tax', 'Tax Credits'];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, // 2 cards per row
+        crossAxisSpacing: 6, // 🔹 Reduced space between columns
+        mainAxisSpacing: 6,  // 🔹 Reduced space between rows
+        childAspectRatio: 2.3, // 🔹 Adjust for better fitting
+      ),
+      itemCount: topics.length,
+      itemBuilder: (context, index) {
+        return _buildTopicCard(context, topics[index]);
+      },
+    );
+  }
+
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -184,86 +195,55 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  /// **📚 Featured Topics**
-  Widget _buildFeaturedTopics(BuildContext context) {
-    List<Map<String, String>> topics = [
-      {'title': 'Self-Assessment'},
-      {'title': 'VAT Returns'},
-      {'title': 'Business Tax'},
-      {'title': 'Tax Credits'},
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.8,
-      ),
-      itemCount: topics.length,
-      itemBuilder: (context, index) {
-        return _buildTopicCard(context, topics[index]['title']!);
-      },
-    );
-  }
-
-  /// **📌 Topic Card with "Learn >" Button**
   Widget _buildTopicCard(BuildContext context, String title) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey.withAlpha(50), blurRadius: 5, spreadRadius: 2),
-        ],
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontFamily: 'OakSans',
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF043377),
-            ),
+    return GestureDetector(
+      onTap: () =>
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TaxAssistantScreen(topic: title)),
           ),
-          const SizedBox(height: 13),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TaxAssistantScreen(topic: title),
-                ),
-              );
-            },
-            child: const Row(
-              children: [
-                Text(
-                  'Learn',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'OakSans',
-                    color: Color(0xFF49B3CD),
-                  ),
-                ),
-                SizedBox(width: 5),
-                Icon(Icons.arrow_forward, size: 16, color: Color(0xFF49B3CD)),
-              ],
+      child: Container(
+        width: 140, // Keep your custom width
+        height: 80, // Keep your custom height
+        padding: const EdgeInsets.all(12),
+        alignment: Alignment.topLeft, // 🔹 Ensures content starts from top-left
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(color: Colors.grey.withAlpha(50),
+                blurRadius: 5,
+                spreadRadius: 2)
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, // 🔹 Aligns text to left
+          mainAxisAlignment: MainAxisAlignment.start, // 🔹 Keeps content at top
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'OakSans',
+                color: Color(0xFF043377),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 5), // 🔹 Small space between title & label
+            Text(
+              "Learn >",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF49B3CD), // 🔹 Keeps "Learn >" distinct
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
 
 
   /// **🕒 Recent Activity**
@@ -299,5 +279,4 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
-
 }

@@ -7,6 +7,7 @@ import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/settings.dart';
 import '../splash_screens/chatscreen.dart';
 import '../splash_screens/profile.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TaxAssistantScreen extends StatefulWidget {
   final String topic;
@@ -97,7 +98,15 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tax Assistant"),
+        backgroundColor: Colors.blue[900],
+        title: Text(
+            "Tax Assistant",
+            style: GoogleFonts.urbanist(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
