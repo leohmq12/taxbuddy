@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:taxbuddy/backend/chat_ai/chat_service.dart';
 import 'dart:typed_data';
+import 'dart:async';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -66,6 +67,48 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Widget _buildTypingIndicator() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        ),
+        constraints: const BoxConstraints(maxWidth: 60),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDot(),
+            const SizedBox(width: 4),
+            _buildDot(delay: 200),
+            const SizedBox(width: 4),
+            _buildDot(delay: 400),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDot({int delay = 0}) {
+    return AnimatedOpacity(
+      opacity: 1.0,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: Colors.grey[600],
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,16 +139,12 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
-              children: _messages
-                  .map((msg) => _buildChatBubble(msg["content"]!, msg["role"] == "user"))
-                  .toList(),
+              children: [
+                ..._messages.map((msg) => _buildChatBubble(msg["content"]!, msg["role"] == "user")),
+                if (_isLoading) _buildTypingIndicator(),
+              ],
             ),
           ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(),
-            ),
           _buildInputArea(),
         ],
       ),

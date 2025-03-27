@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:taxbuddy/backend/settings/settings_service.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // Required for Text-to-Speech
+import 'package:taxbuddy/backend/settings/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -86,14 +88,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[900],
-        title: Text(
-          "Settings",
-          style: GoogleFonts.urbanist(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/images/image1.png'),
+              radius: 18,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "Settings",
+              style: GoogleFonts.urbanist(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        )
+
       ),
       backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
@@ -139,14 +152,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingTile(
                       title: "Dark Mode",
                       subtitle: "Use dark theme",
-                      value: isDarkModeOn,
+                      value: Provider.of<ThemeProvider>(context).isDarkMode,
                       onChanged: (newValue) {
-                        setState(() {
-                          isDarkModeOn = newValue;
-                        });
-                        _updateSetting('darkMode', newValue);
+                        Provider.of<ThemeProvider>(context, listen: false).toggleDarkMode(newValue);
+                        _updateSetting('darkMode', newValue); // ✅ Optional, but make sure this updates SharedPreferences if needed.
                       },
                     ),
+
                     const Divider(),
                     _buildSettingTile(
                       title: "Simplified Language",

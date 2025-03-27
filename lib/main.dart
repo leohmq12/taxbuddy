@@ -7,17 +7,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/splash_screens/splash_screen.dart';
 import 'screens/splash_screens/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:taxbuddy/backend/settings/settings_service.dart';
+import 'package:provider/provider.dart';
+import 'package:taxbuddy/backend/settings/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try{
-    await dotenv.load(fileName: ".env");
-    print ("✅ .env file loaded successfully");
-  } catch (e) {
-    print ("❌ Error loading .env file: $e");
-  }
-  await Firebase.initializeApp();
+  SettingsBackend _settingsBackend = SettingsBackend();
+  bool isDarkMode = (await _settingsBackend.getSetting('darkMode')) ?? false; // ✅ Load Dark Mode setting
 
+  try {
+    await dotenv.load(fileName: ".env");
+    print("✅ .env file loaded successfully");
+  } catch (e) {
+    print("❌ Error loading .env file: $e");
+  }
+
+  await Firebase.initializeApp();
   print("✅ Firebase Initialized");
 
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -26,11 +32,22 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
-  print("🟢 User: \${user?.email}, IsFirstTime: \$isFirstTime");
+  print("🟢 User: ${user?.email}, IsFirstTime: $isFirstTime");
 
-  runApp(MyApp(user: user, isFirstTime: isFirstTime));
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider()..setDarkMode(isDarkMode), // ✅ Apply saved Dark Mode state
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) => MyApp(
+          user: user,
+          isFirstTime: isFirstTime,
+        ),
+      ),
+    ),
+  );
 }
 
+/// **🌟 MyApp Class**
 class MyApp extends StatelessWidget {
   final User? user;
   final bool isFirstTime;
@@ -39,13 +56,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context); // ✅ Listen to ThemeProvider
+
     return MaterialApp(
       title: 'Tax Buddy',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         textTheme: GoogleFonts.jostTextTheme(),
+        scaffoldBackgroundColor: Colors.white,
+        brightness: Brightness.light,
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+        textTheme: GoogleFonts.jostTextTheme(),
+        scaffoldBackgroundColor: Colors.black87,
+      ),
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light, // ✅ Apply Dark/Light Mode
       initialRoute: '/',
       routes: {
         '/': (context) => AuthChecker(isFirstTime: isFirstTime, user: user),

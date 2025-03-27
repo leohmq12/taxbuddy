@@ -16,14 +16,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[900], // Dark blue app bar
-        title: Text(
-          "Your Profile",
-          style: GoogleFonts.urbanist(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/images/image1.png'),
+              radius: 18
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "Your Profile",
+              style: GoogleFonts.urbanist(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        )
       ),
       backgroundColor: Colors.grey[100], // Light gray background
       body: SingleChildScrollView(

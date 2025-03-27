@@ -42,14 +42,24 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[900], // Dark blue app bar
-        title: Text(
-          "Tax Calculator",
-          style: GoogleFonts.urbanist(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/images/image1.png'),
+              radius: 18,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "Tax Calculator",
+              style: GoogleFonts.urbanist(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        )
       ),
       body: SingleChildScrollView(
         child: Padding(

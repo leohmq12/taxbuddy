@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter/material.dart';
 
 class SettingsBackend {
   final FlutterTts _flutterTts = FlutterTts();
@@ -34,28 +35,26 @@ class SettingsBackend {
   /// 🔹 Retrieve a specific setting
   Future<bool> getSetting(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(key) ?? false;
+    if(key == 'darkMode') {
+      return prefs.getBool(key) ?? false;
+    }
+    return prefs.getBool(key) ?? true;
   }
 
-  /// 🔹 Logout function (Firebase Authentication)
-  Future<void> logout() async {
-    await FirebaseAuth.instance.signOut();
-  }
 
   /// 🔹 Enable or disable Voice Guidance (TTS)
   Future<void> toggleVoiceGuidance(bool isEnabled) async {
     await saveSetting('voiceGuidance', isEnabled);
     if (isEnabled) {
-      await _flutterTts.speak("Voice Guidance is now enabled.");
+      await _flutterTts.speak("Voice Guidance activated.");
     } else {
-      await _flutterTts.speak("Voice Guidance is now disabled.");
+      await _flutterTts.speak("Voice Guidance deactivated.");
     }
   }
 
   /// 🔹 Enable or disable Simplified Language mode
   Future<void> toggleSimplifiedLanguage(bool isEnabled) async {
     await saveSetting('simplifiedLanguage', isEnabled);
-
     // ✅ Check if Voice Guidance is enabled before speaking
     bool isVoiceGuidanceEnabled = await getSetting('voiceGuidance');
     if (isVoiceGuidanceEnabled) {
@@ -65,5 +64,9 @@ class SettingsBackend {
         await _flutterTts.speak("Simplified Language mode deactivated.");
       }
     }
+  }
+  /// 🔹 Logout function (Firebase Authentication)
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
   }
 }
