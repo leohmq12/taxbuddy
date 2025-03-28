@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:taxbuddy/backend/chat_ai/chat_service.dart';
 import 'dart:typed_data';
-import 'dart:async';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -50,9 +49,16 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isUser ? Colors.blue : Colors.white,
+          color: isUser
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+            ),
+          ],
         ),
         constraints: const BoxConstraints(maxWidth: 300),
         child: Text(
@@ -60,7 +66,9 @@ class _ChatScreenState extends State<ChatScreen> {
           style: GoogleFonts.urbanist(
             fontSize: 14,
             fontWeight: FontWeight.normal,
-            color: isUser ? Colors.white : Colors.black,
+            color: isUser
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
@@ -74,9 +82,14 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+            ),
+          ],
         ),
         constraints: const BoxConstraints(maxWidth: 60),
         child: Row(
@@ -94,15 +107,15 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildDot({int delay = 0}) {
-    return AnimatedOpacity(
-      opacity: 1.0,
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOut,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 900),
+      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
       child: Container(
+        key: ValueKey(delay),
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           shape: BoxShape.circle,
         ),
       ),
@@ -113,11 +126,11 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Theme.of(context).colorScheme.primary,
         automaticallyImplyLeading: false, // Removes the back button
         title: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               backgroundImage: AssetImage('assets/images/image1.png'),
               radius: 18,
             ),
@@ -127,7 +140,7 @@ class _ChatScreenState extends State<ChatScreen> {
               style: GoogleFonts.urbanist(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ],
@@ -154,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildInputArea() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.grey[50],
+      color: Theme.of(context).colorScheme.background,
       child: Row(
         children: [
           Expanded(
@@ -162,7 +175,10 @@ class _ChatScreenState extends State<ChatScreen> {
               controller: _textController,
               decoration: InputDecoration(
                 hintText: "Send message...",
-                fillColor: Colors.white,
+                hintStyle: GoogleFonts.urbanist(
+                  color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
+                ),
+                fillColor: Theme.of(context).colorScheme.surface,
                 filled: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                 border: OutlineInputBorder(
@@ -175,9 +191,9 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 8),
           FloatingActionButton(
             onPressed: _sendMessage,
-            backgroundColor: Colors.blue,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             mini: true,
-            child: const Icon(Icons.send, color: Colors.white),
+            child: Icon(Icons.send, color: Theme.of(context).colorScheme.onPrimary),
           ),
         ],
       ),

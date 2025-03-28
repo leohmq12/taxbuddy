@@ -26,7 +26,7 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
     TaxCalculator taxCalculator = TaxCalculator(
       annualIncome: annualIncome,
       selfEmploymentIncome: selfEmploymentIncome,
-      taxYear: selectedTaxYear, // Pass selected tax year
+      taxYear: selectedTaxYear,
     );
 
     setState(() {
@@ -39,122 +39,118 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[900], // Dark blue app bar
+        backgroundColor: isDarkMode ? const Color(0xFF004B9C) : Colors.white,
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: AssetImage('assets/images/image1.png'),
-              radius: 18,
-            ),
+            Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
             const SizedBox(width: 10),
             Text(
               "Tax Calculator",
               style: GoogleFonts.urbanist(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
           ],
-        )
+        ),
       ),
+      backgroundColor: Theme.of(context).colorScheme.background, // Consistent Background
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Align(
-                alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey[100], // Matching Design
+                borderRadius: BorderRadius.circular(10),
               ),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 5,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estimate Your Taxes',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'OakSans',
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? const Color(0xFF49B3CD) : Colors.blue[900],
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Estimate Your Taxes',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'OakSans',
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF043377),
+                  ),
+                  const SizedBox(height: 15),
+                  _buildCurrencyTextField('Annual Income', annualIncomeController, isDarkMode),
+                  const SizedBox(height: 15),
+                  _buildTaxYearDropdown(isDarkMode),
+                  const SizedBox(height: 15),
+                  _buildCurrencyTextField('Self-Employment Income', selfEmploymentController, isDarkMode),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: calculateTaxes,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF004B9C),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        minimumSize: const Size(double.infinity, 50),
                       ),
-                    ),
-                    const SizedBox(height: 15),
-                    _buildCurrencyTextField('Annual Income', annualIncomeController),
-                    const SizedBox(height: 15),
-                    _buildTaxYearDropdown(),
-                    const SizedBox(height: 15),
-                    _buildCurrencyTextField('Self-Employment Income', selfEmploymentController),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: calculateTaxes,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF004B9C),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                        child: const Text(
-                          'Calculate Taxes',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'OakSans',
-                            color: Colors.white,
-                          ),
+                      child: const Text(
+                        'Calculate Taxes',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'OakSans',
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              _buildTaxBreakdown(),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            _buildTaxBreakdown(isDarkMode),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCurrencyTextField(String label, TextEditingController controller) {
+  Widget _buildCurrencyTextField(String label, TextEditingController controller, bool isDarkMode) {
     return TextField(
       controller: controller,
+      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
         prefixText: '£ ',
+        filled: true,
+        fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none, // Remove white border in dark mode
         ),
       ),
       keyboardType: TextInputType.number,
     );
   }
 
-  Widget _buildTaxYearDropdown() {
+  Widget _buildTaxYearDropdown(bool isDarkMode) {
     return DropdownButtonFormField<String>(
       value: selectedTaxYear,
+      dropdownColor: isDarkMode ? Colors.black12.withOpacity(0.95) : Colors.white,
       items: taxYears.map((String year) {
         return DropdownMenuItem(
           value: year,
-          child: Text(year),
+          child: Text(
+            year,
+            style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+          ),
         );
       }).toList(),
       onChanged: (String? newValue) {
@@ -164,35 +160,39 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
       },
       decoration: InputDecoration(
         labelText: 'Tax Year',
+        labelStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
+        filled: true,
+        fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none, // Remove white border in dark mode
         ),
       ),
     );
   }
 
-  Widget _buildTaxBreakdown() {
+  Widget _buildTaxBreakdown(bool isDarkMode) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Estimated Tax Breakdown',
           style: TextStyle(
             fontSize: 18,
             fontFamily: 'OakSans',
             fontWeight: FontWeight.bold,
-            color: Color(0xFF043377),
+            color: isDarkMode ? const Color(0xFF49B3CD) : Colors.blue[900],
           ),
         ),
         const SizedBox(height: 10),
-        _buildTaxRow('Income Tax', '£${incomeTax.toStringAsFixed(2)}'),
-        _buildTaxRow('National Insurance', '£${nationalInsurance.toStringAsFixed(2)}'),
-        _buildTaxRow('VAT (if registered)', '£${vat.toStringAsFixed(2)}'),
+        _buildTaxRow('Income Tax', '£${incomeTax.toStringAsFixed(2)}', isDarkMode),
+        _buildTaxRow('National Insurance', '£${nationalInsurance.toStringAsFixed(2)}', isDarkMode),
+        _buildTaxRow('VAT (if registered)', '£${vat.toStringAsFixed(2)}', isDarkMode),
       ],
     );
   }
 
-  Widget _buildTaxRow(String label, String value) {
+  Widget _buildTaxRow(String label, String value, bool isDarkMode) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -200,15 +200,15 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 16, fontFamily: 'OakSans'),
+            style: TextStyle(fontSize: 16, fontFamily: 'OakSans', color: isDarkMode ? Colors.white : Colors.black),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontFamily: 'OakSans',
               fontWeight: FontWeight.bold,
-              color: Color(0xFF004B9C),
+              color: isDarkMode ? const Color(0xFF49B3CD) : Colors.blue[900],
             ),
           ),
         ],

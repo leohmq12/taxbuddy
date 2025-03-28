@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: IndexedStack(
           index: _selectedIndex,
           children: _screens,
@@ -85,8 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF004B9C),
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+      unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
+      backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.calculate), label: 'Calculator'),
@@ -103,6 +104,10 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme
+        .of(context)
+        .brightness == Brightness.dark;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return Padding(
@@ -117,13 +122,13 @@ class HomeContent extends StatelessWidget {
                 const SizedBox(height: 10),
                 _buildSearchBar(context),
                 const SizedBox(height: 20),
-                _buildSectionTitle('Featured Topics'),
+                _buildSectionTitle('Featured Topics', isDarkMode),
                 const SizedBox(height: 10),
-                _buildFeaturedTopics(context),
+                _buildFeaturedTopics(context, isDarkMode),
                 const SizedBox(height: 20),
-                _buildSectionTitle('Recent Activity'),
+                _buildSectionTitle('Recent Activity', isDarkMode),
                 const SizedBox(height: 10),
-                _buildRecentActivityCard(),
+                _buildRecentActivityCard(context, isDarkMode),
                 const SizedBox(height: 30),
               ],
             ),
@@ -135,17 +140,25 @@ class HomeContent extends StatelessWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     TextEditingController searchController = TextEditingController();
+    bool isDarkMode = Theme
+        .of(context)
+        .brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme
+            .of(context)
+            .cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextField(
         controller: searchController,
+        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: 'Search UK tax topics or ask a question',
+          hintStyle: TextStyle(
+              color: isDarkMode ? Colors.white70 : Colors.black54),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           prefixIcon: const Icon(Icons.mic, color: Color(0xFF49B3CD)),
@@ -163,39 +176,44 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturedTopics(BuildContext context) {
-    List<String> topics = ['Self-Assessment', 'VAT Returns', 'Business Tax', 'Tax Credits'];
+  Widget _buildFeaturedTopics(BuildContext context, bool isDarkMode) {
+    List<String> topics = [
+      'Capital Gains',
+      'Corporate Tax',
+      'Dividend Tax',
+      'Self Employment',
+      'VAT'
+    ];
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // 2 cards per row
-        crossAxisSpacing: 6, // 🔹 Reduced space between columns
-        mainAxisSpacing: 6,  // 🔹 Reduced space between rows
-        childAspectRatio: 2.3, // 🔹 Adjust for better fitting
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
+        childAspectRatio: 2.3,
       ),
       itemCount: topics.length,
       itemBuilder: (context, index) {
-        return _buildTopicCard(context, topics[index]);
+        return _buildTopicCard(context, topics[index], isDarkMode);
       },
     );
   }
 
-
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, bool isDarkMode) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 18,
         fontFamily: 'OakSans',
         fontWeight: FontWeight.bold,
-        color: Color(0xFF043377),
+        color: isDarkMode ? Colors.white : const Color(0xFF043377),
       ),
     );
   }
 
-  Widget _buildTopicCard(BuildContext context, String title) {
+  Widget _buildTopicCard(BuildContext context, String title, bool isDarkMode) {
     return GestureDetector(
       onTap: () =>
           Navigator.push(
@@ -204,40 +222,34 @@ class HomeContent extends StatelessWidget {
                 builder: (context) => TaxAssistantScreen(topic: title)),
           ),
       child: Container(
-        width: 140, // Keep your custom width
-        height: 80, // Keep your custom height
+        width: 140,
+        height: 80,
         padding: const EdgeInsets.all(12),
-        alignment: Alignment.topLeft, // 🔹 Ensures content starts from top-left
+        alignment: Alignment.topLeft,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme
+              .of(context)
+              .cardColor,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(color: Colors.grey.withAlpha(50),
-                blurRadius: 5,
-                spreadRadius: 2)
-          ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // 🔹 Aligns text to left
-          mainAxisAlignment: MainAxisAlignment.start, // 🔹 Keeps content at top
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'OakSans',
-                color: Color(0xFF043377),
+                color: isDarkMode ? Colors.white : const Color(0xFF043377),
               ),
             ),
-            const SizedBox(height: 5), // 🔹 Small space between title & label
-            Text(
+            const SizedBox(height: 5),
+            const Text(
               "Learn >",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF49B3CD), // 🔹 Keeps "Learn >" distinct
-              ),
+              style: TextStyle(fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF49B3CD)),
             ),
           ],
         ),
@@ -245,20 +257,16 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-
-  /// **🕒 Recent Activity**
-  Widget _buildRecentActivityCard() {
+  Widget _buildRecentActivityCard(BuildContext context, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme
+            .of(context)
+            .cardColor, // Matching Featured Topics box color
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey.withAlpha(50), blurRadius: 5, spreadRadius: 2),
-        ],
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -267,11 +275,11 @@ class HomeContent extends StatelessWidget {
               fontSize: 16,
               fontFamily: 'OakSans',
               fontWeight: FontWeight.bold,
-              color: Color(0xFF043377),
+              color: isDarkMode ? Colors.white : const Color(0xFF043377),
             ),
           ),
-          SizedBox(height: 6),
-          Text(
+          const SizedBox(height: 5),
+          const Text(
             'Self Assessment Deadline: 31 October',
             style: TextStyle(fontSize: 14, color: Color(0xFF49B3CD)),
           ),

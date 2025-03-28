@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:taxbuddy/backend/settings/settings_service.dart';
-import 'package:flutter_tts/flutter_tts.dart'; // Required for Text-to-Speech
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:taxbuddy/backend/settings/theme_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +14,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsBackend _settingsBackend = SettingsBackend();
-  final FlutterTts flutterTts = FlutterTts(); // Initialize TTS
+  final FlutterTts flutterTts = FlutterTts();
 
   bool isVoiceGuidanceOn = true;
   bool isDarkModeOn = false;
@@ -68,14 +68,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("No", style: TextStyle(color: Color(0xFF004B9C))),
+              child: Text(
+                "No",
+                style: TextStyle(
+                  color: Provider.of<ThemeProvider>(context).isDarkMode
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _logout();
               },
-              child: const Text("Yes", style: TextStyle(color: Color(0xFF004B9C))),
+              child: Text(
+                "Yes",
+                style: TextStyle(
+                  color: Provider.of<ThemeProvider>(context).isDarkMode
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
           ],
         );
@@ -85,9 +99,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Theme.of(context).colorScheme.primary,
         automaticallyImplyLeading: false,
         title: Row(
           children: [
@@ -101,14 +117,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: GoogleFonts.urbanist(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ],
-        )
-
+        ),
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -121,19 +136,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Image.asset('assets/images/ls.png', fit: BoxFit.contain),
               ),
               const SizedBox(height: 5),
-              Text("Version 1.0.0", style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              Text(
+                "Version 1.0.0",
+                style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
+              ),
               const SizedBox(height: 20),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
-                child: Text("App Settings", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: Text(
+                  "App Settings",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'OakSans',
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Color(0xFF49B3CD) : Color(0xFF043377), // ✅ Fix
+                  ),
+                ),
               ),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).shadowColor.withOpacity(0.1),
+                      blurRadius: 5,
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -141,6 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: "Voice Guidance",
                       subtitle: "Enable spoken explanations",
                       value: isVoiceGuidanceOn,
+                      isDarkMode: isDarkMode,
                       onChanged: (newValue) {
                         setState(() {
                           isVoiceGuidanceOn = newValue;
@@ -148,22 +180,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _updateSetting('voiceGuidance', newValue);
                       },
                     ),
-                    const Divider(),
                     _buildSettingTile(
                       title: "Dark Mode",
                       subtitle: "Use dark theme",
                       value: Provider.of<ThemeProvider>(context).isDarkMode,
+                      isDarkMode: isDarkMode,
                       onChanged: (newValue) {
-                        Provider.of<ThemeProvider>(context, listen: false).toggleDarkMode(newValue);
-                        _updateSetting('darkMode', newValue); // ✅ Optional, but make sure this updates SharedPreferences if needed.
+                        Provider.of<ThemeProvider>(context, listen: false)
+                            .toggleDarkMode(newValue);
+                        _updateSetting('darkMode', newValue);
                       },
                     ),
-
-                    const Divider(),
                     _buildSettingTile(
                       title: "Simplified Language",
                       subtitle: "Avoid tax jargon",
                       value: isSimplifiedLanguageOn,
+                      isDarkMode: isDarkMode,
                       onChanged: (newValue) {
                         setState(() {
                           isSimplifiedLanguageOn = newValue;
@@ -180,11 +212,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: ElevatedButton(
                   onPressed: _showLogoutConfirmationDialog,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF004B9C),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6)),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text("Log Out", style: TextStyle(color: Colors.white, fontSize: 16)),
+                  child: Text(
+                    "Log Out",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -199,6 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
+    required bool isDarkMode,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -208,12 +248,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : const Color(0xFF004B9C), // ✅ Fix
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).hintColor,
+                ),
+              ),
             ],
           ),
-          Switch(value: value, onChanged: onChanged, activeColor: Colors.blue),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Theme.of(context).colorScheme.primary,
+          ),
         ],
       ),
     );

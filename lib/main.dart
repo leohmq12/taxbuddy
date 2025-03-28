@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/splash_screens/home.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:taxbuddy/backend/settings/settings_service.dart';
 import 'package:provider/provider.dart';
 import 'package:taxbuddy/backend/settings/theme_provider.dart';
+import 'package:taxbuddy/backend/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,18 +61,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tax Buddy',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        textTheme: GoogleFonts.jostTextTheme(),
-        scaffoldBackgroundColor: Colors.white,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-        textTheme: GoogleFonts.jostTextTheme(),
-        scaffoldBackgroundColor: Colors.black87,
-      ),
+      theme: lightTheme,  // ✅ Use imported light theme
+      darkTheme: darkTheme, // ✅ Use imported dark theme
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light, // ✅ Apply Dark/Light Mode
       initialRoute: '/',
       routes: {

@@ -83,7 +83,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Padding(
@@ -95,64 +98,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Center(child: Image.asset("assets/images/ls.png", height: 80)),
 
               const SizedBox(height: 20),
-              const Center(
+              Center(
                 child: Text(
                   "Sign Up",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              const Text("Full Name"),
-              TextField(
-                controller: _nameController,
-                focusNode: _nameFocus,
-                decoration: const InputDecoration(
-                  hintText: "Enter your Full Name",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              const Text("Email Address"),
-              TextField(
-                controller: _emailController,
-                focusNode: _emailFocus,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Enter your Email Address",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              const Text("Password"),
-              TextField(
-                controller: _passwordController,
-                focusNode: _passwordFocus,
-                obscureText: !_isPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: "Enter your Password",
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontFamily: 'OakSans',
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode
+                        ? const Color(0xFF49B3CD) // ✅ Dark Mode: Keep existing color
+                        : const Color(0xFF043377), // ✅ Light Mode: Corrected color
                   ),
                 ),
               ),
+
+              const SizedBox(height: 30),
+
+              _buildLabel("Full Name", isDarkMode),
+              _buildTextField(_nameController, _nameFocus, "Enter your Full Name", isDarkMode),
+              const SizedBox(height: 20),
+
+              _buildLabel("Email Address", isDarkMode),
+              _buildTextField(_emailController, _emailFocus, "Enter your Email Address", isDarkMode, isEmail: true),
+              const SizedBox(height: 20),
+
+              _buildLabel("Password", isDarkMode),
+              _buildPasswordField(isDarkMode),
               const SizedBox(height: 30),
 
               Center(
                 child: ElevatedButton(
                   onPressed: _signUp,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF004B9C),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     minimumSize: const Size(double.infinity, 50),
                   ),
@@ -184,9 +162,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: const Text(
-                    "Already have an account? Sign In",
-                    style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                  child: RichText(
+                    text: TextSpan(
+                      text: "Already have an account? ",
+                      style: TextStyle(
+                        fontFamily: 'OakSans',
+                        fontSize: 12,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.normal,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: "Sign In",
+                          style: TextStyle(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Color(0xFF49B3CD)
+                                : Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -202,17 +200,87 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF004B9C),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
                       minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: const Text("Go to Login", style: TextStyle(color: Colors.white, fontSize: 16),
+                    child: const Text(
+                      "Go to Login",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ),
                 ),
-                )],
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text, bool isDarkMode) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: isDarkMode
+            ? Theme.of(context).textTheme.bodyLarge!.color // ✅ Dark mode follows theme
+            : const Color(0xFF043377), // ✅ Light mode uses correct color
+      ),
+    );
+  }
+
+
+  Widget _buildTextField(TextEditingController controller, FocusNode focusNode, String hint, bool isDarkMode, {bool isEmail = false}) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
+        filled: true,
+        fillColor: Theme.of(context).cardColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(bool isDarkMode) {
+    return TextField(
+      controller: _passwordController,
+      focusNode: _passwordFocus,
+      obscureText: !_isPasswordVisible,
+      style: TextStyle(
+        color: isDarkMode ? Colors.white.withOpacity(0.9) : Colors.black
+            .withOpacity(0.9),
+      ),
+      // Match opacity with email field
+      decoration: InputDecoration(
+        hintText: "Enter your Password",
+        hintStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : Colors
+              .black54, // Match hint color with email field
+        ),
+        filled: true,
+        fillColor: Theme
+            .of(context)
+            .cardColor,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            color: isDarkMode ? Colors.white70 : Colors.black54,
+          ),
+          onPressed: () =>
+              setState(() => _isPasswordVisible = !_isPasswordVisible),
         ),
       ),
     );
