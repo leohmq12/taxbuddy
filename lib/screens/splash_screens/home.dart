@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taxbuddy/screens/splash_screens/calc_select.dart';
 import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/settings.dart';
 import '../splash_screens/profile.dart';
@@ -7,6 +8,7 @@ import '../splash_screens/learn_screen.dart';
 import 'package:taxbuddy/backend/search/search_service.dart';
 import 'package:flutter/services.dart';
 import '../splash_screens/region.dart';
+import '../splash_screens/calc_select.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _showingRegionScreen = false;
+  bool _showingCalculatorScreen = false;
 
   final List<Widget> _screens = [
     Scaffold(
@@ -53,17 +56,17 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   void _onItemTapped(int index) {
-    if (index == 1 && !_showingRegionScreen) {
-      // Show region screen when calculator is first tapped
+    if (index == 1) {
       setState(() {
         _selectedIndex = index;
         _showingRegionScreen = true;
+        _showingCalculatorScreen = false;
       });
     } else {
-      // For all other cases
       setState(() {
         _selectedIndex = index;
         _showingRegionScreen = false;
+        _showingCalculatorScreen = false;
       });
     }
   }
@@ -72,29 +75,39 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_selectedIndex != 0 || _showingRegionScreen) {
-          setState(() {
-            _selectedIndex = 0;
-            _showingRegionScreen = false;
-          });
+        if (_showingCalculatorScreen) {
+          setState(() => _showingCalculatorScreen = false);
+          return false;
+        }
+        if (_showingRegionScreen) {
+          setState(() => _showingRegionScreen = false);
+          return false;
+        }
+        if (_selectedIndex != 0) {
+          setState(() => _selectedIndex = 0);
           return false;
         }
         SystemNavigator.pop();
         return false;
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
         body: IndexedStack(
           index: _selectedIndex,
           children: [
             _screens[0], // Home
-            _showingRegionScreen
+            _showingCalculatorScreen
+                ? SelectCalculatorScreen(
+              onBackToRegion: () {
+                setState(() => _showingCalculatorScreen = false);
+              },
+            )
+                : _showingRegionScreen
                 ? SelectRegionScreen(
               onBackToHome: () {
-                setState(() {
-                  _showingRegionScreen = false;
-                  _selectedIndex = 0; //Set to Home Screen Index
-                });
+                setState(() => _showingRegionScreen = false);
+              },
+              onRegionSelected: () {
+                setState(() => _showingCalculatorScreen = true);
               },
             )
                 : _screens[1], // Calculator

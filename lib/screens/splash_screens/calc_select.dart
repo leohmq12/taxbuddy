@@ -1,33 +1,28 @@
 import 'package:flutter/material.dart';
 
-class SelectRegionScreen extends StatefulWidget {
-  final VoidCallback onBackToHome;
-  final VoidCallback onRegionSelected;
+class SelectCalculatorScreen extends StatefulWidget {
+  final VoidCallback onBackToRegion;
 
-  const SelectRegionScreen({
-    super.key,
-    required this.onBackToHome,
-    required this.onRegionSelected,
-  });
+  const SelectCalculatorScreen({super.key, required this.onBackToRegion});
 
   @override
-  _SelectRegionScreenState createState() => _SelectRegionScreenState();
+  _SelectCalculatorState createState() => _SelectCalculatorState();
 }
 
-class _SelectRegionScreenState extends State<SelectRegionScreen> {
-  String? _selectedRegion;
+class _SelectCalculatorState extends State<SelectCalculatorScreen> {
+  String? _selectedTopic;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        widget.onBackToHome();
+        widget.onBackToRegion();
         return false;
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            'Select Your Region',
+          title: const Text(
+            'Select Your Calculator',  // Changed title
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -37,27 +32,29 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
           ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-            onPressed: widget.onBackToHome,
+            onPressed: widget.onBackToRegion,
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
         body: ListView(
           children: [
-            _buildRegionTile(context, 'England'),
-            _buildRegionTile(context, 'Wales'),
-            _buildRegionTile(context, 'Scotland'),
-            _buildRegionTile(context, 'Northern Ireland'),
+            _buildTopicTile(context, 'Capital Gains Tax Calculator'),
+            _buildTopicTile(context, 'Corporate Tax Calculator'),
+            _buildTopicTile(context, 'Dividend Tax Calculator'),
+            _buildTopicTile(context, 'Self Employment Calculator'),
+            _buildTopicTile(context, 'VAT Calculator'),
+            _buildTopicTile(context, 'General Tax Calculator'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRegionTile(BuildContext context, String region) {
-    bool isSelected = _selectedRegion == region;
+  Widget _buildTopicTile(BuildContext context, String topic) {
+    bool isSelected = _selectedTopic == topic;
     return ListTile(
       title: Text(
-        region,
+        topic,
         style: TextStyle(
           fontFamily: 'OakSans',
           fontSize: 16,
@@ -72,8 +69,11 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
         ),
       ),
       onTap: () {
-        setState(() => _selectedRegion = region);
-        widget.onRegionSelected();
+        setState(() {
+          _selectedTopic = topic;
+        });
+        // Uncomment if you want to return home after selection:
+        // widget.onBackToHome();
       },
     );
   }
