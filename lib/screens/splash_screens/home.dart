@@ -6,6 +6,7 @@ import '../splash_screens/chatscreen.dart';
 import '../splash_screens/learn_screen.dart';
 import 'package:taxbuddy/backend/search/search_service.dart';
 import 'package:flutter/services.dart';
+import '../splash_screens/region.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  bool _showingRegionScreen = false;
 
   final List<Widget> _screens = [
     Scaffold(
@@ -51,18 +53,29 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (index == 1 && !_showingRegionScreen) {
+      // Show region screen when calculator is first tapped
+      setState(() {
+        _selectedIndex = index;
+        _showingRegionScreen = true;
+      });
+    } else {
+      // For all other cases
+      setState(() {
+        _selectedIndex = index;
+        _showingRegionScreen = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_selectedIndex != 0) {
+        if (_selectedIndex != 0 || _showingRegionScreen) {
           setState(() {
             _selectedIndex = 0;
+            _showingRegionScreen = false;
           });
           return false;
         }
@@ -73,7 +86,22 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.background,
         body: IndexedStack(
           index: _selectedIndex,
-          children: _screens,
+          children: [
+            _screens[0], // Home
+            _showingRegionScreen
+                ? SelectRegionScreen(
+              onBackToHome: () {
+                setState(() {
+                  _showingRegionScreen = false;
+                  _selectedIndex = 0; //Set to Home Screen Index
+                });
+              },
+            )
+                : _screens[1], // Calculator
+            _screens[2], // Chat
+            _screens[3], // Profile
+            _screens[4], // Settings
+          ],
         ),
         bottomNavigationBar: _buildBottomNavBar(),
       ),
@@ -82,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(
-      currentIndex: _selectedIndex,
+      currentIndex: _showingRegionScreen ? 1 : _selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
