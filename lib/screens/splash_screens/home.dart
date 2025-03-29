@@ -12,6 +12,7 @@ import '../splash_screens/se_calculator.dart';
 import '../splash_screens/vat_calculator.dart';
 import '../splash_screens/dt_calculator.dart';
 import '../splash_screens/tax_calculator.dart';
+import '../splash_screens/cg_calculator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showingVATTaxScreen = false;
   bool _showingDividendTaxScreen = false;
   bool _showingGeneralTaxScreen = false;
+  bool _showingCapitalGainsTaxScreen = false;
 
   final List<Widget> _screens = [
     Scaffold(
@@ -75,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showingVATTaxScreen = false;
         _showingDividendTaxScreen = false;
         _showingGeneralTaxScreen = false;
+        _showingCapitalGainsTaxScreen = false;
       } else {
         // Reset all calculator states for other tabs
         _showingRegionScreen = false;
@@ -84,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showingVATTaxScreen = false;
         _showingDividendTaxScreen = false;
         _showingGeneralTaxScreen = false;
+        _showingCapitalGainsTaxScreen = false;
       }
     });
   }
@@ -92,6 +96,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (_showingCapitalGainsTaxScreen) {
+          setState(() => _showingCapitalGainsTaxScreen = false);
+          return false;
+        }
         if (_showingDividendTaxScreen) {
           setState(() => _showingDividendTaxScreen = false);
           return false;
@@ -131,7 +139,12 @@ class _HomeScreenState extends State<HomeScreen> {
           index: _selectedIndex,
           children: [
             _screens[0], // Home
-            _showingGeneralTaxScreen
+            _showingCapitalGainsTaxScreen
+                ? CapitalGainsTaxScreen(onBackToCalculator: (){
+                  setState (() => _showingCapitalGainsTaxScreen =false);
+              },
+            )
+                : _showingGeneralTaxScreen
                 ? TaxCalculatorScreen(
               onBackToCalculator: () {
                 setState(() => _showingGeneralTaxScreen = false);
@@ -178,6 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     _showingDividendTaxScreen = true;
                   } else if (calculatorType == 'General Tax Calculator') {
                     _showingGeneralTaxScreen = true;
+                  } else if (calculatorType == 'Capital Gains Tax Calculator'){
+                    _showingCapitalGainsTaxScreen = true;
                   }
                 });
               },
