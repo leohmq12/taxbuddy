@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import '../splash_screens/region.dart';
 import '../splash_screens/ct_calculator.dart';
 import '../splash_screens/se_calculator.dart';
+import '../splash_screens/vat_calculator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showingCalculatorScreen = false;
   bool _showingCorporateTaxScreen = false;
   bool _showingSelfEmployedTaxScreen = false;
+  bool _showingVATTaxScreen = false;
   final List<Widget> _screens = [
     Scaffold(
       appBar: AppBar(
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showingCalculatorScreen = false;
         _showingCorporateTaxScreen = false;
         _showingSelfEmployedTaxScreen = false;
+        _showingVATTaxScreen = false;
       });
     } else {
       setState(() {
@@ -73,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showingCalculatorScreen = false;
         _showingCorporateTaxScreen = false;
         _showingSelfEmployedTaxScreen = false;
+        _showingVATTaxScreen = false;
       });
     }
   }
@@ -81,6 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (_showingVATTaxScreen){
+          setState(() => _showingVATTaxScreen = false);
+          return false;
+        }
         if (_showingSelfEmployedTaxScreen) {
           setState(() => _showingSelfEmployedTaxScreen =false);
           return false;
@@ -109,7 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
           index: _selectedIndex,
           children: [
             _screens[0], // Home
-            _showingSelfEmployedTaxScreen
+            _showingVATTaxScreen
+                ? VATTaxScreen(
+              onBackToCalculator: () {
+                setState(() => _showingVATTaxScreen = false);
+              },
+            )
+                : _showingSelfEmployedTaxScreen
                 ? SelfEmployedTaxScreen(
               onBackToCalculator: () {
                 setState(() => _showingSelfEmployedTaxScreen = false);
@@ -132,8 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     _showingCorporateTaxScreen = true;
                   } else if (calculatorType == 'Self Employment Calculator') {
                     _showingSelfEmployedTaxScreen = true;
+                  } else if (calculatorType == 'VAT Calculator') {
+                    _showingVATTaxScreen = true;
                   }
-                  // Add other calculator types as needed
                 });
               },
             )
