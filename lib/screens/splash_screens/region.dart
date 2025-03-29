@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SelectRegionScreen extends StatefulWidget {
-  final VoidCallback onBackToHome;
+  final VoidCallback onBackToHome; // This should directly go to home
   final VoidCallback onRegionSelected;
 
   const SelectRegionScreen({
@@ -21,7 +21,7 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        widget.onBackToHome();
+        widget.onBackToHome(); // This will go directly to home
         return false;
       },
       child: Scaffold(
@@ -37,9 +37,9 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
           ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-            onPressed: widget.onBackToHome,
+            onPressed: widget.onBackToHome, // This will go directly to home
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: const Color(0xFF004B9C),
         ),
         body: ListView(
           children: [
@@ -73,7 +73,7 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
       ),
       onTap: () {
         setState(() => _selectedRegion = region);
-        widget.onRegionSelected();
+        widget.onRegionSelected(); // This will proceed to calculator selection
       },
     );
   }

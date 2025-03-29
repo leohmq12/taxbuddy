@@ -39,7 +39,7 @@ class _SelectCalculatorState extends State<SelectCalculatorScreen> {
             icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
             onPressed: widget.onBackToRegion,
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: const Color(0xFF004B9C),
         ),
         body: ListView(
           children: [

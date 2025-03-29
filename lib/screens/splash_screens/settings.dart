@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: const Color(0xFF004B9C),
         automaticallyImplyLeading: false,
         title: Row(
           children: [

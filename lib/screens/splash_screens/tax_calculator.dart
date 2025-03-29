@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:taxbuddy/backend/tax/tax_service.dart'; // Import backend
+import 'package:taxbuddy/backend/tax/tax_service.dart';
 
 class TaxCalculatorScreen extends StatefulWidget {
-  const TaxCalculatorScreen({super.key});
+  final VoidCallback? onBackToCalculator;
+
+  const TaxCalculatorScreen({super.key, this.onBackToCalculator});
 
   @override
   _TaxCalculatorScreenState createState() => _TaxCalculatorScreenState();
@@ -43,24 +45,32 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF004B9C) : Colors.white,
-        automaticallyImplyLeading: false,
+        backgroundColor: isDarkMode ? const Color(0xFF004B9C) : const Color(0xFF004B9C),
         title: Row(
           children: [
-            Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
+            IconButton(
+              icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.white),
+              onPressed: () {
+                if (widget.onBackToCalculator != null) {
+                  widget.onBackToCalculator!();
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
             const SizedBox(width: 10),
             Text(
               "Tax Calculator",
               style: GoogleFonts.urbanist(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black,
+                color: isDarkMode ? Colors.white : Colors.white,
               ),
             ),
           ],
         ),
       ),
-      backgroundColor: Theme.of(context).colorScheme.background, // Consistent Background
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -69,7 +79,7 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey[100], // Matching Design
+                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey[100],
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(

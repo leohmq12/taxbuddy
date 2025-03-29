@@ -30,7 +30,7 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: const Color(0xFF004B9C),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: widget.onBackToCalculator,

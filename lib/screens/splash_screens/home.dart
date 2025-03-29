@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:taxbuddy/screens/splash_screens/calc_select.dart';
-import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/settings.dart';
 import '../splash_screens/profile.dart';
 import '../splash_screens/chatscreen.dart';
@@ -11,6 +10,8 @@ import '../splash_screens/region.dart';
 import '../splash_screens/ct_calculator.dart';
 import '../splash_screens/se_calculator.dart';
 import '../splash_screens/vat_calculator.dart';
+import '../splash_screens/dt_calculator.dart';
+import '../splash_screens/tax_calculator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showingCorporateTaxScreen = false;
   bool _showingSelfEmployedTaxScreen = false;
   bool _showingVATTaxScreen = false;
+  bool _showingDividendTaxScreen = false;
+  bool _showingGeneralTaxScreen = false;
+
   final List<Widget> _screens = [
     Scaffold(
       appBar: AppBar(
@@ -53,44 +57,51 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: const HomeContent(),
     ),
-    const TaxCalculatorScreen(),
     const ChatScreen(),
     const ProfileScreen(),
     const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
-    if (index == 1) {
-      setState(() {
-        _selectedIndex = index;
+    setState(() {
+      _selectedIndex = index;
+
+      // When calculator tab is selected (index 1), show region screen first
+      if (index == 1) {
         _showingRegionScreen = true;
         _showingCalculatorScreen = false;
         _showingCorporateTaxScreen = false;
         _showingSelfEmployedTaxScreen = false;
         _showingVATTaxScreen = false;
-      });
-    } else {
-      setState(() {
-        _selectedIndex = index;
+        _showingDividendTaxScreen = false;
+        _showingGeneralTaxScreen = false;
+      } else {
+        // Reset all calculator states for other tabs
         _showingRegionScreen = false;
         _showingCalculatorScreen = false;
         _showingCorporateTaxScreen = false;
         _showingSelfEmployedTaxScreen = false;
         _showingVATTaxScreen = false;
-      });
-    }
+        _showingDividendTaxScreen = false;
+        _showingGeneralTaxScreen = false;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_showingVATTaxScreen){
+        if (_showingDividendTaxScreen) {
+          setState(() => _showingDividendTaxScreen = false);
+          return false;
+        }
+        if (_showingVATTaxScreen) {
           setState(() => _showingVATTaxScreen = false);
           return false;
         }
         if (_showingSelfEmployedTaxScreen) {
-          setState(() => _showingSelfEmployedTaxScreen =false);
+          setState(() => _showingSelfEmployedTaxScreen = false);
           return false;
         }
         if (_showingCorporateTaxScreen) {
@@ -102,7 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
           return false;
         }
         if (_showingRegionScreen) {
-          setState(() => _showingRegionScreen = false);
+          setState(() {
+            _showingRegionScreen = false;
+            _selectedIndex = 0; // Return to home
+          });
           return false;
         }
         if (_selectedIndex != 0) {
@@ -117,7 +131,13 @@ class _HomeScreenState extends State<HomeScreen> {
           index: _selectedIndex,
           children: [
             _screens[0], // Home
-            _showingVATTaxScreen
+            _showingGeneralTaxScreen
+                ? TaxCalculatorScreen(
+              onBackToCalculator: () {
+                setState(() => _showingGeneralTaxScreen = false);
+              },
+            )
+                : _showingVATTaxScreen
                 ? VATTaxScreen(
               onBackToCalculator: () {
                 setState(() => _showingVATTaxScreen = false);
@@ -135,6 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() => _showingCorporateTaxScreen = false);
               },
             )
+                : _showingDividendTaxScreen
+                ? DividendTaxScreen(
+              onBackToCalculator: () {
+                setState(() => _showingDividendTaxScreen = false);
+              },
+            )
                 : _showingCalculatorScreen
                 ? SelectCalculatorScreen(
               onBackToRegion: () {
@@ -148,23 +174,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     _showingSelfEmployedTaxScreen = true;
                   } else if (calculatorType == 'VAT Calculator') {
                     _showingVATTaxScreen = true;
+                  } else if (calculatorType == 'Dividend Tax Calculator') {
+                    _showingDividendTaxScreen = true;
+                  } else if (calculatorType == 'General Tax Calculator') {
+                    _showingGeneralTaxScreen = true;
                   }
                 });
               },
             )
-                : _showingRegionScreen
-                ? SelectRegionScreen(
+                : SelectRegionScreen(
               onBackToHome: () {
-                setState(() => _showingRegionScreen = false);
+                setState(() {
+                  _showingRegionScreen = false;
+                  _selectedIndex = 0;
+                });
               },
               onRegionSelected: () {
                 setState(() => _showingCalculatorScreen = true);
               },
-            )
-                : _screens[1], // Default Calculator Screen
-            _screens[2], // Chat
-            _screens[3], // Profile
-            _screens[4], // Settings
+            ),
+            _screens[1], // Chat
+            _screens[2], // Profile
+            _screens[3], // Settings
           ],
         ),
         bottomNavigationBar: _buildBottomNavBar(),
@@ -174,7 +205,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(
-      currentIndex: _showingRegionScreen ? 1 : _selectedIndex,
+      currentIndex: _showingRegionScreen ||
+          _showingCalculatorScreen ||
+          _showingCorporateTaxScreen ||
+          _showingSelfEmployedTaxScreen ||
+          _showingVATTaxScreen ||
+          _showingDividendTaxScreen
+          ? 1 : _selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
@@ -196,17 +233,12 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme
-        .of(context)
-        .brightness == Brightness.dark;
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: MediaQuery
-              .of(context)
-              .size
-              .width * 0.05),
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,16 +264,12 @@ class HomeContent extends StatelessWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     TextEditingController searchController = TextEditingController();
-    bool isDarkMode = Theme
-        .of(context)
-        .brightness == Brightness.dark;
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Theme
-            .of(context)
-            .cardColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextField(
@@ -249,8 +277,7 @@ class HomeContent extends StatelessWidget {
         style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: 'Search UK tax topics or ask a question',
-          hintStyle: TextStyle(
-              color: isDarkMode ? Colors.white70 : Colors.black54),
+          hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           prefixIcon: const Icon(Icons.mic, color: Color(0xFF49B3CD)),
@@ -307,21 +334,17 @@ class HomeContent extends StatelessWidget {
 
   Widget _buildTopicCard(BuildContext context, String title, bool isDarkMode) {
     return GestureDetector(
-      onTap: () =>
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => TaxAssistantScreen(topic: title)),
-          ),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TaxAssistantScreen(topic: title)),
+      ),
       child: Container(
         width: 140,
         height: 80,
         padding: const EdgeInsets.all(12),
         alignment: Alignment.topLeft,
         decoration: BoxDecoration(
-          color: Theme
-              .of(context)
-              .cardColor,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -339,23 +362,22 @@ class HomeContent extends StatelessWidget {
             const SizedBox(height: 5),
             const Text(
               "Learn >",
-              style: TextStyle(fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF49B3CD)),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF49B3CD),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildRecentActivityCard(BuildContext context, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Theme
-            .of(context)
-            .cardColor, // Matching Featured Topics box color
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
