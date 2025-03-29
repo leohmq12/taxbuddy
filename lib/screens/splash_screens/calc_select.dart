@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class SelectCalculatorScreen extends StatefulWidget {
   final VoidCallback onBackToRegion;
+  final Function(String) onCalculatorSelected; // New callback for calculator selection
 
-  const SelectCalculatorScreen({super.key, required this.onBackToRegion});
+  const SelectCalculatorScreen({
+    super.key,
+    required this.onBackToRegion,
+    required this.onCalculatorSelected,
+  });
 
   @override
   _SelectCalculatorState createState() => _SelectCalculatorState();
@@ -22,7 +27,7 @@ class _SelectCalculatorState extends State<SelectCalculatorScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Select Your Calculator',  // Changed title
+            'Select Your Calculator',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -69,11 +74,8 @@ class _SelectCalculatorState extends State<SelectCalculatorScreen> {
         ),
       ),
       onTap: () {
-        setState(() {
-          _selectedTopic = topic;
-        });
-        // Uncomment if you want to return home after selection:
-        // widget.onBackToHome();
+        setState(() => _selectedTopic = topic);
+        widget.onCalculatorSelected(topic); // Notify parent about selection
       },
     );
   }

@@ -8,7 +8,8 @@ import '../splash_screens/learn_screen.dart';
 import 'package:taxbuddy/backend/search/search_service.dart';
 import 'package:flutter/services.dart';
 import '../splash_screens/region.dart';
-import '../splash_screens/calc_select.dart';
+import '../splash_screens/ct_calculator.dart';
+import '../splash_screens/se_calculator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _showingRegionScreen = false;
   bool _showingCalculatorScreen = false;
-
+  bool _showingCorporateTaxScreen = false;
+  bool _showingSelfEmployedTaxScreen = false;
   final List<Widget> _screens = [
     Scaffold(
       appBar: AppBar(
@@ -61,12 +63,16 @@ class _HomeScreenState extends State<HomeScreen> {
         _selectedIndex = index;
         _showingRegionScreen = true;
         _showingCalculatorScreen = false;
+        _showingCorporateTaxScreen = false;
+        _showingSelfEmployedTaxScreen = false;
       });
     } else {
       setState(() {
         _selectedIndex = index;
         _showingRegionScreen = false;
         _showingCalculatorScreen = false;
+        _showingCorporateTaxScreen = false;
+        _showingSelfEmployedTaxScreen = false;
       });
     }
   }
@@ -75,6 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (_showingSelfEmployedTaxScreen) {
+          setState(() => _showingSelfEmployedTaxScreen =false);
+          return false;
+        }
+        if (_showingCorporateTaxScreen) {
+          setState(() => _showingCorporateTaxScreen = false);
+          return false;
+        }
         if (_showingCalculatorScreen) {
           setState(() => _showingCalculatorScreen = false);
           return false;
@@ -95,10 +109,32 @@ class _HomeScreenState extends State<HomeScreen> {
           index: _selectedIndex,
           children: [
             _screens[0], // Home
-            _showingCalculatorScreen
+            _showingSelfEmployedTaxScreen
+                ? SelfEmployedTaxScreen(
+              onBackToCalculator: () {
+                setState(() => _showingSelfEmployedTaxScreen = false);
+              },
+            )
+                : _showingCorporateTaxScreen
+                ? CorporateTaxScreen(
+              onBackToCalculator: () {
+                setState(() => _showingCorporateTaxScreen = false);
+              },
+            )
+                : _showingCalculatorScreen
                 ? SelectCalculatorScreen(
               onBackToRegion: () {
                 setState(() => _showingCalculatorScreen = false);
+              },
+              onCalculatorSelected: (String calculatorType) {
+                setState(() {
+                  if (calculatorType == 'Corporate Tax Calculator') {
+                    _showingCorporateTaxScreen = true;
+                  } else if (calculatorType == 'Self Employment Calculator') {
+                    _showingSelfEmployedTaxScreen = true;
+                  }
+                  // Add other calculator types as needed
+                });
               },
             )
                 : _showingRegionScreen
@@ -110,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() => _showingCalculatorScreen = true);
               },
             )
-                : _screens[1], // Calculator
+                : _screens[1], // Default Calculator Screen
             _screens[2], // Chat
             _screens[3], // Profile
             _screens[4], // Settings
