@@ -5,47 +5,70 @@ class CapitalGainsTaxCalculator {
     required double sellingCosts,
     required double purchaseCosts,
     required String taxYear,
-    required String region, // Not used (rates are UK-wide)
+    required String region,
     required double taxableIncome,
+    required bool isResidential,
   }) {
-    // Annual exempt amount (2024/2025: £3,000; 2025/2026: £1,500)
-    final annualExemptAmount = taxYear == '2024/2025' ? 3000.0 : 1500.0;
+    // Annual Exempt Amount (AEA)
+    final annualExemptAmount = 3000.0;
 
-    // Calculate chargeable gain
+    // Chargeable Gain Calculation
     final chargeableGain = saleProceeds - purchasePrice - sellingCosts - purchaseCosts;
-    final taxableGain = (chargeableGain - annualExemptAmount).clamp(0, double.infinity);
+    final taxableGain = (chargeableGain - annualExemptAmount).clamp(0.0, double.infinity);
 
-    // CGT rates for non-residential assets (UK-wide)
-    final basicRate = 0.10; // 10% for basic-rate taxpayers
-    final higherRate = 0.20; // 20% for higher-rate taxpayers
+    // Capital Gains Tax Rates
+    final basicRate = 0.18;  // 18% for non-residential
+    final higherRate = 0.24; // 24% for non-residential
 
-    // Determine tax bands (2024/2025 & 2025/2026 thresholds)
+    final basicOtherRate = 0.24;  // 24% for residential property
+    final higherOtherRate = 0.28; // 28% for residential property
+
+    // UK Basic Rate Tax Band
     final basicRateBand = 50270.0;
-    final remainingBasicBand = (basicRateBand - taxableIncome).clamp(0, basicRateBand);
+    final remainingBasicBand = (basicRateBand - taxableIncome).clamp(0.0, basicRateBand) as double;
 
-    double basicTax = 0.0;
-    double higherTax = 0.0;
+    // Initialize Tax Values
+    double basicTax = 0.0, higherTax = 0.0;
+    double basicOtherTax = 0.0, higherOtherTax = 0.0;
 
-    if (taxableIncome >= basicRateBand) {
-      // Entire gain taxed at higher rate (20%)
-      higherTax = taxableGain * higherRate;
-    } else if (taxableIncome + taxableGain <= basicRateBand) {
-      // Entire gain taxed at basic rate (10%)
-      basicTax = taxableGain * basicRate;
-    } else {
-      // Part basic rate (10%), part higher rate (20%)
-      basicTax = remainingBasicBand * basicRate;
-      higherTax = (taxableGain - remainingBasicBand) * higherRate;
+    if (taxableGain > 0) {
+      if (taxableIncome < basicRateBand) {
+        // Portion taxed at basic rate, rest at higher rate
+        if (taxableGain <= remainingBasicBand) {
+          if (isResidential) {
+            basicOtherTax = taxableGain * basicOtherRate;
+          } else {
+            basicTax = taxableGain * basicRate;
+          }
+        } else {
+          double higherTaxableAmount = taxableGain - remainingBasicBand.toDouble();
+
+          if (isResidential) {
+            basicOtherTax = remainingBasicBand * basicOtherRate;
+            higherOtherTax = higherTaxableAmount * higherOtherRate;
+          } else {
+            basicTax = remainingBasicBand * basicRate;
+            higherTax = higherTaxableAmount * higherRate;
+          }
+        }
+      } else {
+        // All taxable gain taxed at higher rate
+        if (isResidential) {
+          higherOtherTax = taxableGain * higherOtherRate;
+        } else {
+          higherTax = taxableGain * higherRate;
+        }
+      }
     }
 
     return {
       'chargeableGain': chargeableGain.toStringAsFixed(2),
       'taxableGain': taxableGain.toStringAsFixed(2),
-      'basic': basicTax.toStringAsFixed(2),       // 10% (non-residential)
-      'basicOtherAssets': '0.00',                 // Not applicable (residential excluded)
-      'higher': higherTax.toStringAsFixed(2),     // 20% (non-residential)
-      'higherOtherAssets': '0.00',               // Not applicable (residential excluded)
-      'region': region, // For reference (unused)
+      'basic': basicTax.toStringAsFixed(2),
+      'basicOtherAssets': basicOtherTax.toStringAsFixed(2),
+      'higher': higherTax.toStringAsFixed(2),
+      'higherOtherAssets': higherOtherTax.toStringAsFixed(2),
+      'region': region,
     };
   }
 }

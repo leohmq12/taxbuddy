@@ -21,6 +21,7 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
   final TextEditingController _sellingCostsController = TextEditingController();
   final TextEditingController _purchaseCostsController = TextEditingController();
   final TextEditingController _taxableIncomeController = TextEditingController();
+  String selectedAssetType = "";
 
   Map<String, dynamic> _results2024 = {};
   Map<String, dynamic> _results2025 = {};
@@ -36,6 +37,8 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
   }
 
   void _calculate() {
+    bool isResidential = _determineIfResidential();
+
     setState(() {
       final saleProceeds = double.tryParse(_saleProceedsController.text) ?? 0;
       final purchasePrice = double.tryParse(_purchasePriceController.text) ?? 0;
@@ -51,6 +54,7 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
         taxYear: '2024/2025',
         region: widget.selectedRegion,
         taxableIncome: taxableIncome,
+        isResidential: isResidential,
       );
 
       _results2025 = CapitalGainsTaxCalculator.calculate(
@@ -61,10 +65,14 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
         taxYear: '2025/2026',
         region: widget.selectedRegion,
         taxableIncome: taxableIncome,
+        isResidential: isResidential,
       );
     });
   }
-
+  bool _determineIfResidential() {
+    return selectedAssetType.toLowerCase().contains("property") ||
+        selectedAssetType.toLowerCase().contains("residence");
+  }
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -183,7 +191,7 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
                 keyboardType: TextInputType.number,
                 onChanged: (_) => _calculate(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox (height: 16),
               Text(
                 'Your Taxable Income',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
