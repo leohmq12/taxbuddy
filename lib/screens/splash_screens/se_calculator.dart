@@ -1,20 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:taxbuddy/backend/region/region_backend.dart';
+import 'package:taxbuddy/backend/tax/se_backend.dart';
 
-class SelfEmployedTaxScreen extends StatelessWidget {
+class SelfEmployedTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
 
   const SelfEmployedTaxScreen({super.key, required this.onBackToCalculator});
 
   @override
+  State<SelfEmployedTaxScreen> createState() => _SelfEmployedTaxScreenState();
+}
+
+class _SelfEmployedTaxScreenState extends State<SelfEmployedTaxScreen> {
+  final TextEditingController _profitController = TextEditingController();
+  double _profit = 0;
+
+  @override
+  void dispose() {
+    _profitController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final region = Provider.of<RegionProvider>(context).selectedRegion ?? 'England';
+
     return WillPopScope(
       onWillPop: () async {
-        onBackToCalculator();
+        widget.onBackToCalculator();
         return false;
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Self Employed Income Tax & NI',
             style: TextStyle(
               color: Colors.white,
@@ -25,12 +44,12 @@ class SelfEmployedTaxScreen extends StatelessWidget {
           ),
           backgroundColor: const Color(0xFF004B9C),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: onBackToCalculator,
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: widget.onBackToCalculator,
           ),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -38,33 +57,39 @@ class SelfEmployedTaxScreen extends StatelessWidget {
                 'If you are self-employed, the calculator below helps to work out how much income you will have after National Insurance and Income Tax.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'The figures below assume that self-employment is your only source of income and you are subject to NI charges.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'End of year profit',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
-                      : Color(0xFF374151),
+                      : const Color(0xFF374151),
                 ),
               ),
               TextField(
+                controller: _profitController,
                 decoration: InputDecoration(
                   hintText: 'e.g. 25000',
                   hintStyle: TextStyle(color: Theme.of(context).hintColor),
-                  border: UnderlineInputBorder(),
+                  border: const UnderlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    _profit = double.tryParse(value) ?? 0;
+                  });
+                },
               ),
-              SizedBox(height: 20),
-              _buildTaxSection(context, '2025/2026'),
-              _buildTaxSection(context, '2024/2025'),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
+              _buildTaxSection(context, '2025/2026', region),
+              _buildTaxSection(context, '2024/2025', region),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -76,7 +101,7 @@ class SelfEmployedTaxScreen extends StatelessWidget {
                     ),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Disclaimer',
                     style: TextStyle(
                       fontSize: 16,
@@ -93,34 +118,40 @@ class SelfEmployedTaxScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTaxSection(BuildContext context, String year) {
+  Widget _buildTaxSection(BuildContext context, String year, String region) {
+    final calculations = SelfEmploymentCalculator.calculate(
+      region: region,
+      profit: _profit,
+      taxYear: year,
+    );
+
     return Column(
       children: [
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Center(
           child: Text(
             year,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Color(0xFF49B3CD),
             ),
           ),
         ),
-        SizedBox(height: 8),
-        _buildTaxRow(context, 'End of year profit', '£0'),
-        _buildTaxRow(context, 'Income tax', '£0'),
-        _buildTaxRow(context, 'Class 2 NI', '£0'),
-        _buildTaxRow(context, 'Class 4 NI', '£0'),
-        _buildTaxRow(context, 'Net profit after income tax & NI', '£0'),
-        SizedBox(height: 16),
+        const SizedBox(height: 8),
+        _buildTaxRow(context, 'End of year profit', '£${_profit.toStringAsFixed(2)}'),
+        _buildTaxRow(context, 'Income tax', '£${calculations['incomeTax']!.toStringAsFixed(2)}'),
+        _buildTaxRow(context, 'Class 2 NI', '£${calculations['class2Nics']!.toStringAsFixed(2)}'),
+        _buildTaxRow(context, 'Class 4 NI', '£${calculations['class4Nics']!.toStringAsFixed(2)}'),
+        _buildTaxRow(context, 'Net profit after tax & NI', '£${calculations['netProfit']!.toStringAsFixed(2)}'),
+        const SizedBox(height: 16),
       ],
     );
   }
 
   Widget _buildTaxRow(BuildContext context, String label, String value) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 2),
+      margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.grey[800]
@@ -132,24 +163,23 @@ class SelfEmployedTaxScreen extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                    fontWeight: FontWeight.w500),
               ),
             ),
           ),
           Expanded(
             flex: 1,
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? Color(0xFF004B9C)
-                    : Color(0xFF49B3CD),
-                borderRadius: BorderRadius.only(
+                    ? const Color(0xFF004B9C)
+                    : const Color(0xFF49B3CD),
+                borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(8),
                   bottomRight: Radius.circular(8),
                 ),
@@ -157,7 +187,7 @@ class SelfEmployedTaxScreen extends StatelessWidget {
               child: Text(
                 value,
                 textAlign: TextAlign.right,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
