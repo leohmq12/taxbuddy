@@ -1,15 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:taxbuddy/backend/tax/dt_backend.dart';
 
-class DividendTaxScreen extends StatelessWidget {
+class DividendTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
 
   const DividendTaxScreen({super.key, required this.onBackToCalculator});
 
   @override
+  State<DividendTaxScreen> createState() => _DividendTaxScreenState();
+}
+
+class _DividendTaxScreenState extends State<DividendTaxScreen> {
+  final TextEditingController _salaryController = TextEditingController();
+  final TextEditingController _dividendsController = TextEditingController();
+
+  @override
+  void dispose() {
+    _salaryController.dispose();
+    _dividendsController.dispose();
+    super.dispose();
+  }
+
+  Map<String, dynamic> _calculateTax(String year) {
+    final salary = double.tryParse(_salaryController.text) ?? 0;
+    final dividends = double.tryParse(_dividendsController.text) ?? 0;
+
+    return DividendTaxCalculator.calculate(
+      salary: salary,
+      dividends: dividends,
+      taxYear: year,
+      region: 'England',
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        onBackToCalculator();
+        widget.onBackToCalculator();
         return false;
       },
       child: Scaffold(
@@ -25,8 +53,8 @@ class DividendTaxScreen extends StatelessWidget {
           ),
           backgroundColor: const Color(0xFF004B9C),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: onBackToCalculator,
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: widget.onBackToCalculator,
           ),
         ),
         body: SingleChildScrollView(
@@ -45,12 +73,14 @@ class DividendTaxScreen extends StatelessWidget {
                 ),
               ),
               TextField(
+                controller: _salaryController,
                 decoration: InputDecoration(
                   hintText: 'e.g. 10000',
                   hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: const UnderlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
+                onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
               Text(
@@ -63,12 +93,14 @@ class DividendTaxScreen extends StatelessWidget {
                 ),
               ),
               TextField(
+                controller: _dividendsController,
                 decoration: InputDecoration(
                   hintText: 'e.g. 10000',
                   hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: const UnderlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
+                onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
               _buildTaxSection(context, '2025/2026'),
@@ -103,6 +135,8 @@ class DividendTaxScreen extends StatelessWidget {
   }
 
   Widget _buildTaxSection(BuildContext context, String year) {
+    final results = _calculateTax(year);
+
     return Column(
       children: [
         const SizedBox(height: 12),
@@ -117,16 +151,16 @@ class DividendTaxScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        _buildTaxRow(context, 'Personal allowance', '£0'),
-        _buildTaxRow(context, 'Basic income', '£0'),
-        _buildTaxRow(context, 'Higher income', '£0'),
-        _buildTaxRow(context, 'Additional income', '£0'),
-        _buildTaxRow(context, 'Total income tax', '£0'),
-        _buildTaxRow(context, 'Dividend allowance', '£0'),
-        _buildTaxRow(context, 'Basic dividend', '£0'),
-        _buildTaxRow(context, 'Higher dividend', '£0'),
-        _buildTaxRow(context, 'Additional dividend', '£0'),
-        _buildTaxRow(context, 'Total dividend rate', '£0'),
+        _buildTaxRow(context, 'Personal allowance', '£${results['personalAllowance']}'),
+        _buildTaxRow(context, 'Basic income', '£${results['basicIncomeTax']}'),
+        _buildTaxRow(context, 'Higher income', '£${results['higherIncomeTax']}'),
+        _buildTaxRow(context, 'Additional income', '£${results['additionalIncomeTax']}'),
+        _buildTaxRow(context, 'Total income tax', '£${results['totalIncomeTax']}'),
+        _buildTaxRow(context, 'Dividend allowance', '£${results['dividendAllowance']}'),
+        _buildTaxRow(context, 'Basic dividend', '£${results['basicDividendTax']}'),
+        _buildTaxRow(context, 'Higher dividend', '£${results['higherDividendTax']}'),
+        _buildTaxRow(context, 'Additional dividend', '£${results['additionalDividendTax']}'),
+        _buildTaxRow(context, 'Total dividend rate', '£${results['totalDividendTax']}'),
         const SizedBox(height: 12),
       ],
     );
