@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:taxbuddy/backend/region/region_backend.dart'; // Your RegionProvider
 
 class SelectCalculatorScreen extends StatefulWidget {
   final VoidCallback onBackToRegion;
-  final Function(String) onCalculatorSelected; // New callback for calculator selection
+  final Function(String) onCalculatorSelected;
 
   const SelectCalculatorScreen({
     super.key,
@@ -19,6 +21,10 @@ class _SelectCalculatorState extends State<SelectCalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Backend: Silently access the stored region (no UI impact)
+    final selectedRegion = Provider.of<RegionProvider>(context).selectedRegion;
+    print("Region in Calculator Screen: $selectedRegion");
+
     return WillPopScope(
       onWillPop: () async {
         widget.onBackToRegion();
@@ -66,16 +72,16 @@ class _SelectCalculatorState extends State<SelectCalculatorScreen> {
           fontWeight: FontWeight.normal,
           color: isSelected
               ? (Theme.of(context).brightness == Brightness.dark
-              ? Color(0xFF49B3CD)
-              : Color(0xFF043377))
+              ? const Color(0xFF49B3CD)
+              : const Color(0xFF043377))
               : (Theme.of(context).brightness == Brightness.dark
               ? Theme.of(context).colorScheme.onSurface
-              : Color(0xFF4F5C6F)),
+              : const Color(0xFF4F5C6F)),
         ),
       ),
       onTap: () {
         setState(() => _selectedTopic = topic);
-        widget.onCalculatorSelected(topic); // Notify parent about selection
+        widget.onCalculatorSelected(topic);
       },
     );
   }

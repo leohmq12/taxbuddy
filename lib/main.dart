@@ -10,11 +10,12 @@ import 'package:taxbuddy/backend/settings/settings_service.dart';
 import 'package:provider/provider.dart';
 import 'package:taxbuddy/backend/settings/theme_provider.dart';
 import 'package:taxbuddy/backend/theme/theme.dart';
+import 'package:taxbuddy/backend/region/region_backend.dart'; // 1. Add this import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SettingsBackend _settingsBackend = SettingsBackend();
-  bool isDarkMode = (await _settingsBackend.getSetting('darkMode')) ?? false; // ✅ Load Dark Mode setting
+  bool isDarkMode = (await _settingsBackend.getSetting('darkMode')) ?? false;
 
   try {
     await dotenv.load(fileName: ".env");
@@ -35,9 +36,16 @@ void main() async {
   print("🟢 User: ${user?.email}, IsFirstTime: $isFirstTime");
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider()..setDarkMode(isDarkMode), // ✅ Apply saved Dark Mode state
-      child: Consumer<ThemeProvider>(
+    MultiProvider( // 2. Changed from single Provider to MultiProvider
+      providers: [
+        ChangeNotifierProvider( // 3. Keep existing ThemeProvider
+          create: (context) => ThemeProvider()..setDarkMode(isDarkMode),
+        ),
+        ChangeNotifierProvider( // 4. Add RegionProvider
+          create: (context) => RegionProvider(),
+        ),
+      ],
+      child: Consumer<ThemeProvider>( // 5. Rest remains exactly the same
         builder: (context, themeProvider, child) => MyApp(
           user: user,
           isFirstTime: isFirstTime,
@@ -47,7 +55,7 @@ void main() async {
   );
 }
 
-/// **🌟 MyApp Class**
+/// **🌟 MyApp Class** - NO CHANGES BELOW THIS LINE
 class MyApp extends StatelessWidget {
   final User? user;
   final bool isFirstTime;
@@ -56,14 +64,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context); // ✅ Listen to ThemeProvider
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'Tax Buddy',
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,  // ✅ Use imported light theme
-      darkTheme: darkTheme, // ✅ Use imported dark theme
-      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light, // ✅ Apply Dark/Light Mode
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       initialRoute: '/',
       routes: {
         '/': (context) => AuthChecker(isFirstTime: isFirstTime, user: user),
@@ -74,8 +82,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// **🔹 AuthChecker Widget**
-/// Checks if user is new (show onboarding), else checks authentication
+/// **🔹 AuthChecker Widget** - NO CHANGES BELOW THIS LINE
 class AuthChecker extends StatefulWidget {
   final bool isFirstTime;
   final User? user;
@@ -98,7 +105,6 @@ class _AuthCheckerState extends State<AuthChecker> {
     _checkUserAuthStatus();
   }
 
-  /// **🔍 Check Firebase Authentication State**
   void _checkUserAuthStatus() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (mounted) {
@@ -111,13 +117,8 @@ class _AuthCheckerState extends State<AuthChecker> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ If first-time user → Show onboarding
     if (_isNewUser) return const Splashscreen();
-
-    // ✅ If logged in → Go to HomeScreen
     if (_currentUser != null) return const HomeScreen();
-
-    // 🔑 If not logged in → Show LoginScreen
     return const LoginScreen();
   }
 }

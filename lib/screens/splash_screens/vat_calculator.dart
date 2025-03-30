@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:taxbuddy/backend/region/region_backend.dart';
+import 'package:taxbuddy/backend/tax/vat_backend.dart';
 
 class VATTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
@@ -10,10 +13,32 @@ class VATTaxScreen extends StatefulWidget {
 }
 
 class _VATTaxScreenState extends State<VATTaxScreen> {
-  bool isVatIncluded = false;
+  final TextEditingController _amountController = TextEditingController();
+  bool _isVatIncluded = false;
+  double _amount = 0.0;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final region = Provider.of<RegionProvider>(context).selectedRegion ?? 'England';
+    final calculations = _amount > 0
+        ? VATCalculator.calculateVAT(
+      region: region,
+      amount: _amount,
+      isInclusive: _isVatIncluded,
+    )
+        : {
+      'netAmount': 0.0,
+      'vatAmount': 0.0,
+      'grossAmount': 0.0,
+      'rate': 0.20,
+    };
+
     return WillPopScope(
       onWillPop: () async {
         widget.onBackToCalculator();
@@ -21,7 +46,7 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'VAT',
             style: TextStyle(
               color: Colors.white,
@@ -51,12 +76,18 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
                 ),
               ),
               TextField(
+                controller: _amountController,
                 decoration: InputDecoration(
                   hintText: 'e.g. 5000',
                   hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: const UnderlineInputBorder(),
                 ),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                onChanged: (value) {
+                  setState(() {
+                    _amount = double.tryParse(value) ?? 0.0;
+                  });
+                },
               ),
               const SizedBox(height: 10),
               Row(
@@ -66,18 +97,19 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const Spacer(),
-                  Checkbox(
-                    value: isVatIncluded,
+                  Switch(
+                    value: _isVatIncluded,
                     onChanged: (value) {
                       setState(() {
-                        isVatIncluded = value!;
+                        _isVatIncluded = value;
                       });
                     },
+                    activeColor: const Color(0xFF49B3CD),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              _buildVATSection(context, '2025/2026'),
+              _buildVATSection(context, calculations),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -107,14 +139,14 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
     );
   }
 
-  Widget _buildVATSection(BuildContext context, String year) {
+  Widget _buildVATSection(BuildContext context, Map<String, double> calculations) {
     return Column(
       children: [
         const SizedBox(height: 16),
-        Center(
+        const Center(
           child: Text(
-            year,
-            style: const TextStyle(
+            '2025/2026',
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Color(0xFF49B3CD),
@@ -122,11 +154,23 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        _buildVATRow(context, 'Cost', '£0'),
+        _buildVATRow(
+          context,
+          'Net Amount',
+          '£${calculations['netAmount']!.toStringAsFixed(2)}',
+        ),
         const SizedBox(height: 6),
-        _buildVATRow(context, 'VAT', '£0'),
+        _buildVATRow(
+          context,
+          'VAT (${(calculations['rate']! * 100).toStringAsFixed(0)}%)',
+          '£${calculations['vatAmount']!.toStringAsFixed(2)}',
+        ),
         const SizedBox(height: 6),
-        _buildVATRow(context, 'Total', '£0'),
+        _buildVATRow(
+          context,
+          'Total Amount',
+          '£${calculations['grossAmount']!.toStringAsFixed(2)}',
+        ),
         const SizedBox(height: 16),
       ],
     );
@@ -151,7 +195,8 @@ class _VATTaxScreenState extends State<VATTaxScreen> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),

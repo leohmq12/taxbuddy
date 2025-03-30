@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:taxbuddy/backend/region/region_backend.dart';
 
 class SelectRegionScreen extends StatefulWidget {
-  final VoidCallback onBackToHome; // This should directly go to home
+  final VoidCallback onBackToHome;
   final VoidCallback onRegionSelected;
 
   const SelectRegionScreen({
@@ -15,13 +17,14 @@ class SelectRegionScreen extends StatefulWidget {
 }
 
 class _SelectRegionScreenState extends State<SelectRegionScreen> {
-  String? _selectedRegion;
-
   @override
   Widget build(BuildContext context) {
+    final regionProvider = Provider.of<RegionProvider>(context, listen: false);
+
     return WillPopScope(
       onWillPop: () async {
-        widget.onBackToHome(); // This will go directly to home
+        regionProvider.clearRegion(); // Clear selection when going back
+        widget.onBackToHome();
         return false;
       },
       child: Scaffold(
@@ -37,24 +40,31 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
           ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-            onPressed: widget.onBackToHome, // This will go directly to home
+            onPressed: () {
+              regionProvider.clearRegion(); // Clear selection when going back
+              widget.onBackToHome();
+            },
           ),
           backgroundColor: const Color(0xFF004B9C),
         ),
-        body: ListView(
-          children: [
-            _buildRegionTile(context, 'England'),
-            _buildRegionTile(context, 'Wales'),
-            _buildRegionTile(context, 'Scotland'),
-            _buildRegionTile(context, 'Northern Ireland'),
-          ],
+        body: Consumer<RegionProvider>(
+          builder: (context, provider, child) {
+            return ListView(
+              children: [
+                _buildRegionTile(context, 'England', provider),
+                _buildRegionTile(context, 'Wales', provider),
+                _buildRegionTile(context, 'Scotland', provider),
+                _buildRegionTile(context, 'Northern Ireland', provider),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildRegionTile(BuildContext context, String region) {
-    bool isSelected = _selectedRegion == region;
+  Widget _buildRegionTile(BuildContext context, String region, RegionProvider provider) {
+    bool isSelected = provider.selectedRegion == region;
     return ListTile(
       title: Text(
         region,
@@ -72,8 +82,8 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
         ),
       ),
       onTap: () {
-        setState(() => _selectedRegion = region);
-        widget.onRegionSelected(); // This will proceed to calculator selection
+        provider.selectRegion(region); // Update provider
+        widget.onRegionSelected(); // Proceed to next screen
       },
     );
   }
