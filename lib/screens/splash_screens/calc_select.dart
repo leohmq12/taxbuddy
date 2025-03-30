@@ -4,7 +4,7 @@ import 'package:taxbuddy/backend/region/region_backend.dart'; // Your RegionProv
 
 class SelectCalculatorScreen extends StatefulWidget {
   final VoidCallback onBackToRegion;
-  final Function(String) onCalculatorSelected;
+  final void Function(String) onCalculatorSelected;
 
   const SelectCalculatorScreen({
     super.key,

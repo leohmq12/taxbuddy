@@ -5,8 +5,9 @@ import 'package:taxbuddy/backend/tax/se_backend.dart';
 
 class SelfEmployedTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
+  final String selectedRegion;
 
-  const SelfEmployedTaxScreen({super.key, required this.onBackToCalculator});
+  const SelfEmployedTaxScreen({super.key, required this.onBackToCalculator, required this.selectedRegion});
 
   @override
   State<SelfEmployedTaxScreen> createState() => _SelfEmployedTaxScreenState();

@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showingDividendTaxScreen = false;
   bool _showingGeneralTaxScreen = false;
   bool _showingCapitalGainsTaxScreen = false;
+  String _selectedRegion = 'England'; // Store selected region
 
   final List<Widget> _screens = [
     Scaffold(
@@ -68,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
 
-      // When calculator tab is selected (index 1), show region screen first
       if (index == 1) {
         _showingRegionScreen = true;
         _showingCalculatorScreen = false;
@@ -79,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _showingGeneralTaxScreen = false;
         _showingCapitalGainsTaxScreen = false;
       } else {
-        // Reset all calculator states for other tabs
         _showingRegionScreen = false;
         _showingCalculatorScreen = false;
         _showingCorporateTaxScreen = false;
@@ -89,6 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
         _showingGeneralTaxScreen = false;
         _showingCapitalGainsTaxScreen = false;
       }
+    });
+  }
+
+  void _onRegionSelected(String region) {
+    setState(() {
+      _selectedRegion = region;
+      _showingCalculatorScreen = true;
+      _showingRegionScreen = false;
     });
   }
 
@@ -123,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (_showingRegionScreen) {
           setState(() {
             _showingRegionScreen = false;
-            _selectedIndex = 0; // Return to home
+            _selectedIndex = 0;
           });
           return false;
         }
@@ -140,39 +147,45 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             _screens[0], // Home
             _showingCapitalGainsTaxScreen
-                ? CapitalGainsTaxScreen(onBackToCalculator: (){
-                  setState (() => _showingCapitalGainsTaxScreen =false);
+                ? CapitalGainsTaxScreen(
+              onBackToCalculator: () {
+                setState(() => _showingCapitalGainsTaxScreen = false);
               },
+              selectedRegion: _selectedRegion,
             )
                 : _showingGeneralTaxScreen
                 ? TaxCalculatorScreen(
               onBackToCalculator: () {
                 setState(() => _showingGeneralTaxScreen = false);
-              },
+              }, //selectedregion required but after making the changes.
             )
                 : _showingVATTaxScreen
                 ? VATTaxScreen(
               onBackToCalculator: () {
                 setState(() => _showingVATTaxScreen = false);
               },
+              selectedRegion: _selectedRegion,
             )
                 : _showingSelfEmployedTaxScreen
                 ? SelfEmployedTaxScreen(
               onBackToCalculator: () {
                 setState(() => _showingSelfEmployedTaxScreen = false);
               },
+              selectedRegion: _selectedRegion,
             )
                 : _showingCorporateTaxScreen
                 ? CorporateTaxScreen(
               onBackToCalculator: () {
                 setState(() => _showingCorporateTaxScreen = false);
               },
+              selectedRegion: _selectedRegion,
             )
                 : _showingDividendTaxScreen
                 ? DividendTaxScreen(
               onBackToCalculator: () {
                 setState(() => _showingDividendTaxScreen = false);
               },
+              selectedRegion: _selectedRegion,
             )
                 : _showingCalculatorScreen
                 ? SelectCalculatorScreen(
@@ -191,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _showingDividendTaxScreen = true;
                   } else if (calculatorType == 'General Tax Calculator') {
                     _showingGeneralTaxScreen = true;
-                  } else if (calculatorType == 'Capital Gains Tax Calculator'){
+                  } else if (calculatorType == 'Capital Gains Tax Calculator') {
                     _showingCapitalGainsTaxScreen = true;
                   }
                 });
@@ -204,9 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _selectedIndex = 0;
                 });
               },
-              onRegionSelected: () {
-                setState(() => _showingCalculatorScreen = true);
-              },
+              onRegionSelected: _onRegionSelected,
             ),
             _screens[1], // Chat
             _screens[2], // Profile
@@ -225,8 +236,11 @@ class _HomeScreenState extends State<HomeScreen> {
           _showingCorporateTaxScreen ||
           _showingSelfEmployedTaxScreen ||
           _showingVATTaxScreen ||
-          _showingDividendTaxScreen
-          ? 1 : _selectedIndex,
+          _showingDividendTaxScreen ||
+          _showingGeneralTaxScreen ||
+          _showingCapitalGainsTaxScreen
+          ? 1
+          : _selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
@@ -388,6 +402,7 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildRecentActivityCard(BuildContext context, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(15),

@@ -5,8 +5,9 @@ import 'package:taxbuddy/backend/tax/vat_backend.dart';
 
 class VATTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
+  final String selectedRegion;
 
-  const VATTaxScreen({super.key, required this.onBackToCalculator});
+  const VATTaxScreen({super.key, required this.onBackToCalculator, required this.selectedRegion});
 
   @override
   State<VATTaxScreen> createState() => _VATTaxScreenState();

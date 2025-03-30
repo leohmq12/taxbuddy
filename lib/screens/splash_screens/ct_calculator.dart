@@ -5,8 +5,9 @@ import 'package:taxbuddy/backend/tax/ct_calculator.dart';
 
 class CorporateTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
+  final String selectedRegion;
 
-  const CorporateTaxScreen({super.key, required this.onBackToCalculator});
+  const CorporateTaxScreen({super.key, required this.onBackToCalculator, required this.selectedRegion});
 
   @override
   _CorporateTaxScreenState createState() => _CorporateTaxScreenState();

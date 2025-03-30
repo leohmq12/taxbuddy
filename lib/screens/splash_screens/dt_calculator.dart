@@ -3,8 +3,9 @@ import 'package:taxbuddy/backend/tax/dt_backend.dart';
 
 class DividendTaxScreen extends StatefulWidget {
   final VoidCallback onBackToCalculator;
+  final String selectedRegion;
 
-  const DividendTaxScreen({super.key, required this.onBackToCalculator});
+  const DividendTaxScreen({super.key, required this.onBackToCalculator, required this.selectedRegion});
 
   @override
   State<DividendTaxScreen> createState() => _DividendTaxScreenState();

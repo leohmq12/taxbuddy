@@ -4,7 +4,7 @@ import 'package:taxbuddy/backend/region/region_backend.dart';
 
 class SelectRegionScreen extends StatefulWidget {
   final VoidCallback onBackToHome;
-  final VoidCallback onRegionSelected;
+  final Function(String) onRegionSelected;
 
   const SelectRegionScreen({
     super.key,
@@ -83,7 +83,7 @@ class _SelectRegionScreenState extends State<SelectRegionScreen> {
       ),
       onTap: () {
         provider.selectRegion(region); // Update provider
-        widget.onRegionSelected(); // Proceed to next screen
+        widget.onRegionSelected(region); // Proceed to next screen
       },
     );
   }
