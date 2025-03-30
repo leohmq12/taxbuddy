@@ -130,9 +130,14 @@ class _ChatScreenState extends State<ChatScreen> {
         automaticallyImplyLeading: false, // Removes the back button
         title: Row(
           children: [
-            const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/image1.png'),
-              radius: 18,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/home'); // Replace with your HomeScreen route
+              },
+              child: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/image1.png'),
+                radius: 18,
+              ),
             ),
             const SizedBox(width: 10),
             Text(

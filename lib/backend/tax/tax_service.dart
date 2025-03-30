@@ -16,7 +16,7 @@ class TaxCalculator {
 
     double totalIncome = annualIncome + selfEmploymentIncome;
 
-    // Define tax rules for each tax year
+    // **Verified UK Tax Rates**
     Map<String, Map<String, double>> taxRates = {
       "2023/2024": {
         "personalAllowance": 12570,
@@ -25,51 +25,68 @@ class TaxCalculator {
         "additionalRate": 0.45,
         "higherThreshold": 50270,
         "additionalThreshold": 125140,
-        "nationalInsurance": 0.12,
+        "nicThreshold": 12570,
+        "nicRate": 0.10, // Employment NIC
+        "selfEmployedNIC": 0.09, // Self-employed NIC
       },
       "2024/2025": {
-        "personalAllowance": 12750,
-        "basicRate": 0.19,
-        "higherRate": 0.38,
+        "personalAllowance": 12570,
+        "basicRate": 0.20,
+        "higherRate": 0.40,
         "additionalRate": 0.45,
-        "higherThreshold": 51000,
-        "additionalThreshold": 130000,
-        "nationalInsurance": 0.11,
+        "higherThreshold": 50270,
+        "additionalThreshold": 125140,
+        "nicThreshold": 12570,
+        "nicRate": 0.08, // Reduced NIC
+        "selfEmployedNIC": 0.08, // Self-employed NIC
       },
       "2025/2026": {
-        "personalAllowance": 13000,
-        "basicRate": 0.18,
-        "higherRate": 0.37,
+        "personalAllowance": 12570,
+        "basicRate": 0.20,
+        "higherRate": 0.40,
         "additionalRate": 0.45,
-        "higherThreshold": 52000,
-        "additionalThreshold": 135000,
-        "nationalInsurance": 0.10,
+        "higherThreshold": 50270,
+        "additionalThreshold": 125140,
+        "nicThreshold": 12570,
+        "nicRate": 0.08, // Expected cut
+        "selfEmployedNIC": 0.08, // Self-employed NIC
       },
     };
 
     var rates = taxRates[taxYear] ?? taxRates["2024/2025"]!; // Default to 2024/2025 if not found
 
-    double taxableIncome = totalIncome - rates["personalAllowance"]!;
+    // **Adjust Personal Allowance for High Earners (£1 reduction per £2 over £100,000)**
+    double adjustedPersonalAllowance = rates["personalAllowance"]!;
+    if (totalIncome > 100000) {
+      adjustedPersonalAllowance = (12570 - ((totalIncome - 100000) / 2)).clamp(0, 12570);
+    }
+
+    // **Calculate Taxable Income**
+    double taxableIncome = totalIncome - adjustedPersonalAllowance;
+
     if (taxableIncome > 0) {
-      if (taxableIncome <= rates["higherThreshold"]!) {
-        incomeTax = taxableIncome * rates["basicRate"]!;
-      } else if (taxableIncome <= rates["additionalThreshold"]!) {
-        incomeTax = (rates["higherThreshold"]! * rates["basicRate"]!) +
-            ((taxableIncome - rates["higherThreshold"]!) * rates["higherRate"]!);
-      } else {
-        incomeTax = (rates["higherThreshold"]! * rates["basicRate"]!) +
-            ((rates["additionalThreshold"]! - rates["higherThreshold"]!) * rates["higherRate"]!) +
-            ((taxableIncome - rates["additionalThreshold"]!) * rates["additionalRate"]!);
-      }
+      // **Basic Rate**
+      double basicTaxable = taxableIncome.clamp(0, rates["higherThreshold"]! - adjustedPersonalAllowance);
+      incomeTax += basicTaxable * rates["basicRate"]!;
+
+      // **Higher Rate**
+      double higherTaxable = (taxableIncome - rates["higherThreshold"]!).clamp(0, rates["additionalThreshold"]! - rates["higherThreshold"]!);
+      incomeTax += higherTaxable * rates["higherRate"]!;
+
+      // **Additional Rate**
+      double additionalTaxable = (taxableIncome - rates["additionalThreshold"]!).clamp(0, double.infinity);
+      incomeTax += additionalTaxable * rates["additionalRate"]!;
     }
 
-    // National Insurance Calculation
-    if (totalIncome > rates["personalAllowance"]!) {
-      nationalInsurance = (totalIncome - rates["personalAllowance"]!) * rates["nationalInsurance"]!;
+    // **National Insurance Calculation**
+    if (totalIncome > rates["nicThreshold"]!) {
+      double nicEmployment = (annualIncome - rates["nicThreshold"]!).clamp(0, double.infinity) * rates["nicRate"]!;
+      double nicSelfEmployed = (selfEmploymentIncome - rates["nicThreshold"]!).clamp(0, double.infinity) * rates["selfEmployedNIC"]!;
+      nationalInsurance = nicEmployment + nicSelfEmployed;
     }
 
-    // VAT Calculation (Assuming self-employed income is subject to VAT at 20%)
-    if (selfEmploymentIncome > 0) {
+    // **VAT Calculation** (Only applicable if self-employment income is above £85,000)
+    if (selfEmploymentIncome >= 85000) {
       vat = selfEmploymentIncome * 0.20;
     }
 

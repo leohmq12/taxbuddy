@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:taxbuddy/backend/settings/theme_provider.dart';
+import '../splash_screens/home.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,9 +25,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: AssetImage('assets/images/image1.png'),
-              radius: 18,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/home'); // Replace with your HomeScreen route
+              },
+              child: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/image1.png'),
+                radius: 18,
+              ),
             ),
             const SizedBox(width: 10),
             Text(

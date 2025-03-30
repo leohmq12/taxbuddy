@@ -107,9 +107,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: AssetImage('assets/images/image1.png'),
-              radius: 18,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/home'); // Replace with your HomeScreen route
+              },
+              child: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/image1.png'),
+                radius: 18,
+              ),
             ),
             const SizedBox(width: 10),
             Text(

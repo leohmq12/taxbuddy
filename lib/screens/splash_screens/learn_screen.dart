@@ -26,16 +26,19 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
   int currentSeconds = 0;
   int totalSeconds = 0;
   Timer? _timer;
+  int _selectedIndex = 0; // Track selected navigation index
 
   @override
   void initState() {
     super.initState();
     _fetchContent();
-    _flutterTts.setCompletionHandler(() {
-      setState(() {
-        isPlaying = false;
-        currentSeconds = 0;
-      });
+    _flutterTts.setCompletionHandler(() async {
+      if (mounted) {
+        setState(() {
+          isPlaying = false;
+          currentSeconds = 0;
+        });
+      }
       _timer?.cancel();
     });
   }
@@ -43,22 +46,17 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
   Future<void> _fetchContent() async {
     String aiGeneratedContent = await _chatservice.fetchTaxContentFromAI(
         widget.topic);
-    setState(() {
-      content = aiGeneratedContent;
-    });
-
-    // Estimate duration based on word count
-    int estimatedDuration = (aiGeneratedContent
-        .split(" ")
-        .length / 3).round();
-    setState(() {
-      totalSeconds = estimatedDuration;
-    });
+    if (mounted) {
+      setState(() {
+        content = aiGeneratedContent;
+        totalSeconds = (aiGeneratedContent.split(" ").length / 3).round();
+      });
+    }
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (currentSeconds < totalSeconds) {
+      if (mounted && currentSeconds < totalSeconds) {
         setState(() {
           currentSeconds++;
         });
@@ -76,9 +74,11 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
       await _flutterTts.speak(content);
       _startTimer();
     }
-    setState(() {
-      isPlaying = !isPlaying;
-    });
+    if (mounted) {
+      setState(() {
+        isPlaying = !isPlaying;
+      });
+    }
   }
 
   String _formatTime(int seconds) {
@@ -100,12 +100,12 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
       appBar: AppBar(
         backgroundColor: Colors.blue[900],
         title: Text(
-            "Tax Assistant",
-            style: GoogleFonts.urbanist(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          "Tax Assistant",
+          style: GoogleFonts.urbanist(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -121,7 +121,9 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
               Container(
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[900] // Dark background
+                      : Colors.blue.shade100, // Light mode background
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
@@ -129,22 +131,44 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(isPlaying ? Icons.pause : Icons
-                              .play_arrow),
+                          icon: Icon(
+                            isPlaying ? Icons.pause : Icons.play_arrow,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
+                          ),
                           onPressed: _togglePlayback,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text("${_formatTime(
-                              currentSeconds)} / ${_formatTime(totalSeconds)}"),
+                          child: Text(
+                            "${_formatTime(currentSeconds)} / ${_formatTime(totalSeconds)}",
+                            style: TextStyle(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
                         ),
-                        const Icon(Icons.volume_up),
+                        Icon(
+                          Icons.volume_up,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
                       ],
                     ),
                     Align(
                       alignment: Alignment.centerLeft,
-                      // Align button to the left
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey[800]
+                              : Colors.blue,
+                          foregroundColor: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.white,
+                        ),
                         onPressed: () {},
                         child: const Text("Simplify Jargon"),
                       ),
@@ -156,10 +180,7 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: 100,
-                  maxHeight: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.5, // Limits content height
+                  maxHeight: MediaQuery.of(context).size.height * 0.5, // Limits content height
                 ),
                 child: SingleChildScrollView(
                   child: Text(content, style: const TextStyle(fontSize: 16)),
@@ -170,30 +191,26 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        // Set index according to your tabs
+        currentIndex: _selectedIndex,
         onTap: (index) {
-          // Navigate to other screens accordingly
+          setState(() {
+            _selectedIndex = index;
+          });
           switch (index) {
             case 0:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
               break;
             case 1:
-              Navigator.pushReplacement(context, MaterialPageRoute(
-                  builder: (_) => const TaxCalculatorScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TaxCalculatorScreen()));
               break;
             case 2:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ChatScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatScreen()));
               break;
             case 3:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
               break;
             case 4:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
               break;
           }
         },
@@ -202,15 +219,12 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.calculate), label: 'Calculator'),
+          BottomNavigationBarItem(icon: Icon(Icons.calculate), label: 'Calculator'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );
   }
-  }
-
+}
