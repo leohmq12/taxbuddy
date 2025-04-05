@@ -1,5 +1,6 @@
 name: taxbuddy
 description: A Flutter app for chatbot functionality.
+version: 1.0.0+1 #AppStore Requirement
 
 # Add the SDK constraint here
 environment:

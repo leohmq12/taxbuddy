@@ -11,6 +11,7 @@ workflows:
       - flutter doctor -v
       # Install Flutter dependencies
       - flutter pub get
+      - xcode-project use-profiles #Auto Code Signing
       # Build iOS IPA (Release mode)
       - flutter build ipa --release
 
@@ -18,7 +19,6 @@ workflows:
       # - xcode-project use-profiles
     artifacts:
       - build/ios/ipa/*.ipa  # The generated IPA file
-      - build/ios/archive/*.xcarchive  # Optional: Xcode archive
     publishing:
       email:
         recipients:
