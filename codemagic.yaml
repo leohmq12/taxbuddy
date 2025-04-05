@@ -8,14 +8,11 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      # Navigate to your Flutter project directory
-      - cd apps/mobile  # Replace with your actual path
-
+      - flutter doctor -v
       # Install Flutter dependencies
       - flutter pub get
-
       # Build iOS IPA (Release mode)
-      - flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+      - flutter build ipa --release
 
       # Optional: Code signing setup (if using automatic signing)
       # - xcode-project use-profiles
