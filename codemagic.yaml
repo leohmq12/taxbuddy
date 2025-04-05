@@ -11,6 +11,7 @@ workflows:
       - flutter doctor -v
       # Install Flutter dependencies
       - flutter pub get
+      - keychain initialize
       - xcode-project use-profiles #Auto Code Signing
       - xcode-project build-ipa --workspace ios/Runner.xcworkspace --scheme Runner
       # Build iOS IPA (Release mode)
