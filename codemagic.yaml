@@ -1,0 +1,32 @@
+workflows:
+  ios-release:
+    name: iOS Production Build
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      # Navigate to your Flutter project directory
+      - cd apps/mobile  # Replace with your actual path
+
+      # Install Flutter dependencies
+      - flutter pub get
+
+      # Build iOS IPA (Release mode)
+      - flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+
+      # Optional: Code signing setup (if using automatic signing)
+      # - xcode-project use-profiles
+    artifacts:
+      - build/ios/ipa/*.ipa  # The generated IPA file
+      - build/ios/archive/*.xcarchive  # Optional: Xcode archive
+    publishing:
+      email:
+        recipients:
+          - hafizqamar07@gmail.com  # Replace with your email
+      # Optional: App Store Connect upload (if publishing to TestFlight)
+      # app_store_connect:
+      #   api_key: $APP_STORE_CONNECT_API_KEY
+      #   apple_id: $APPLE_APP_ID
