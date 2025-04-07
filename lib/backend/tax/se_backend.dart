@@ -49,7 +49,6 @@ class SelfEmploymentCalculator {
     switch (region) {
       case 'Scotland':
         return [
-          TaxBand(max: 12570, rate: 0.0), // Personal Allowance
           TaxBand(max: 14876 - 12570, rate: 0.19),
           TaxBand(max: 26561 - 14876, rate: 0.20),
           TaxBand(max: 43662 - 26561, rate: 0.21),
@@ -58,7 +57,6 @@ class SelfEmploymentCalculator {
         ];
       default: // England, Wales, NI
         return [
-          TaxBand(max: 12570, rate: 0.0),
           TaxBand(max: 50270 - 12570, rate: 0.20),
           TaxBand(max: 125140 - 50270, rate: 0.40),
           TaxBand(max: double.infinity, rate: 0.45),
@@ -74,13 +72,13 @@ class SelfEmploymentCalculator {
 
   // ========= NICs CALCULATION =========
   static ({double class2, double class4}) _calculateNICs(double profit, bool is2025) {
-    final class2Weekly = is2025 ? 3.70 : 3.45; // 2025 projected increase
+    // From April 2024 onward, Class 2 NICs are abolished for most
+    double class2 = 0;
 
     // Corrected Class 4 rates
-    final class4LowerRate = 0.09; // Changed from 0.06 to 0.09
+    final class4LowerRate = 0.06; // As per 2024/25 and projected 2025/26
     final class4UpperRate = 0.02;
 
-    double class2 = profit >= 6725 ? class2Weekly * 52 : 0;
     double class4 = 0;
 
     if (profit > 12570) {
