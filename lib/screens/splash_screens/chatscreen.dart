@@ -11,12 +11,36 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final ChatService _chatService = ChatService();
   final List<Map<String, String>> _messages = [];
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isLoading = false;
+  late AnimationController _dotController;
+  int _activeDotIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _dotController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+
+    _dotController.addListener(() {
+      setState(() {
+        _activeDotIndex = (_dotController.value * 3).floor() % 3;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _dotController.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   void _sendMessage() async {
     String userMessage = _textController.text.trim();
@@ -35,7 +59,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _isLoading = false;
     });
 
-    // Generate and play AI voice
     Uint8List? audioData = await _chatService.getSpeech(botResponse);
     if (audioData != null) {
       await _audioPlayer.play(BytesSource(audioData));
@@ -75,6 +98,21 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Widget _buildDot(int index) {
+    return AnimatedOpacity(
+      opacity: _activeDotIndex == index ? 1.0 : 0.3,
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTypingIndicator() {
     return Align(
       alignment: Alignment.centerLeft,
@@ -95,28 +133,12 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDot(),
+            _buildDot(0),
             const SizedBox(width: 4),
-            _buildDot(delay: 200),
+            _buildDot(1),
             const SizedBox(width: 4),
-            _buildDot(delay: 400),
+            _buildDot(2),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDot({int delay = 0}) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 900),
-      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-      child: Container(
-        key: ValueKey(delay),
-        width: 8,
-        height: 8,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          shape: BoxShape.circle,
         ),
       ),
     );
@@ -127,12 +149,12 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF004B9C),
-        automaticallyImplyLeading: false, // Removes the back button
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.pushReplacementNamed(context, '/home'); // Replace with your HomeScreen route
+                Navigator.pushReplacementNamed(context, '/home');
               },
               child: CircleAvatar(
                 backgroundImage: AssetImage('assets/images/image1.png'),
@@ -151,7 +173,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
-
       body: Column(
         children: [
           Expanded(

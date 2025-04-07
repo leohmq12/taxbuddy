@@ -13,6 +13,7 @@ import '../splash_screens/vat_calculator.dart';
 import '../splash_screens/dt_calculator.dart';
 import '../splash_screens/tax_calculator.dart';
 import '../splash_screens/cg_calculator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -262,12 +263,17 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    bool isDarkMode = Theme
+        .of(context)
+        .brightness == Brightness.dark;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery
+              .of(context)
+              .size
+              .width * 0.05),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,12 +299,16 @@ class HomeContent extends StatelessWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     TextEditingController searchController = TextEditingController();
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    bool isDarkMode = Theme
+        .of(context)
+        .brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme
+            .of(context)
+            .cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextField(
@@ -306,7 +316,8 @@ class HomeContent extends StatelessWidget {
         style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: 'Search UK tax topics or ask a question',
-          hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
+          hintStyle: TextStyle(
+              color: isDarkMode ? Colors.white70 : Colors.black54),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
           prefixIcon: const Icon(Icons.mic, color: Color(0xFF49B3CD)),
@@ -363,17 +374,21 @@ class HomeContent extends StatelessWidget {
 
   Widget _buildTopicCard(BuildContext context, String title, bool isDarkMode) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => TaxAssistantScreen(topic: title)),
-      ),
+      onTap: () =>
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TaxAssistantScreen(topic: title)),
+          ),
       child: Container(
         width: 140,
         height: 80,
         padding: const EdgeInsets.all(12),
         alignment: Alignment.topLeft,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Theme
+              .of(context)
+              .cardColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -404,30 +419,47 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildRecentActivityCard(BuildContext context, bool isDarkMode) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Tax Deadline Reminder',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: 'OakSans',
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : const Color(0xFF043377),
+    Future<void> _openTaxDeadlineInfo() async {
+      final url = Uri.parse('https://www.google.com/search?q=uk+tax+deadline');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch URL')),
+        );
+      }
+    }
+
+    return InkWell(
+      onTap: _openTaxDeadlineInfo,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Theme
+              .of(context)
+              .cardColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tax Deadline Reminder',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'OakSans',
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : const Color(0xFF043377),
+              ),
             ),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'Self Assessment Deadline: 31 October',
-            style: TextStyle(fontSize: 14, color: Color(0xFF49B3CD)),
-          ),
-        ],
+            const SizedBox(height: 5),
+            const Text(
+              'Self Assessment Deadline: 31 October',
+              style: TextStyle(fontSize: 14, color: Color(0xFF49B3CD)),
+            ),
+          ],
+        ),
       ),
     );
   }

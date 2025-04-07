@@ -18,19 +18,33 @@ class TaxAssistantScreen extends StatefulWidget {
   _TaxAssistantScreenState createState() => _TaxAssistantScreenState();
 }
 
-class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
+class _TaxAssistantScreenState extends State<TaxAssistantScreen> with TickerProviderStateMixin {
   final FlutterTts _flutterTts = FlutterTts();
   final ChatService _chatservice = ChatService();
-  String content = "Fetching details...";
+  String content = "";
   bool isPlaying = false;
   int currentSeconds = 0;
   int totalSeconds = 0;
   Timer? _timer;
-  int _selectedIndex = 0; // Track selected navigation index
+  int _selectedIndex = 0;
+  late AnimationController _dotController;
+  int _activeDotIndex = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _dotController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+
+    _dotController.addListener(() {
+      setState(() {
+        _activeDotIndex = (_dotController.value * 3).floor() % 3;
+      });
+    });
+
     _fetchContent();
     _flutterTts.setCompletionHandler(() async {
       if (mounted) {
@@ -44,14 +58,44 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
   }
 
   Future<void> _fetchContent() async {
-    String aiGeneratedContent = await _chatservice.fetchTaxContentFromAI(
-        widget.topic);
+    String aiGeneratedContent = await _chatservice.fetchTaxContentFromAI(widget.topic);
     if (mounted) {
       setState(() {
         content = aiGeneratedContent;
         totalSeconds = (aiGeneratedContent.split(" ").length / 3).round();
+        _isLoading = false;
       });
     }
+  }
+
+  Widget _buildDot(int index) {
+    return AnimatedOpacity(
+      opacity: _activeDotIndex == index ? 1.0 : 0.3,
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingContent() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0), // Matches text content padding
+      child: Row(
+        children: [
+          _buildDot(0),
+          const SizedBox(width: 8),
+          _buildDot(1),
+          const SizedBox(width: 8),
+          _buildDot(2),
+        ],
+      ),
+    );
   }
 
   void _startTimer() {
@@ -91,6 +135,7 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
   void dispose() {
     _flutterTts.stop();
     _timer?.cancel();
+    _dotController.dispose();
     super.dispose();
   }
 
@@ -122,8 +167,8 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[900] // Dark background
-                      : Colors.blue.shade100, // Light mode background
+                      ? Colors.grey[900]
+                      : Colors.blue.shade100,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
@@ -137,12 +182,14 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
                                 ? Colors.white
                                 : Colors.black,
                           ),
-                          onPressed: _togglePlayback,
+                          onPressed: content.isNotEmpty ? _togglePlayback : null,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            "${_formatTime(currentSeconds)} / ${_formatTime(totalSeconds)}",
+                            content.isNotEmpty
+                                ? "${_formatTime(currentSeconds)} / ${_formatTime(totalSeconds)}"
+                                : "Loading...",
                             style: TextStyle(
                               color: Theme.of(context).brightness == Brightness.dark
                                   ? Colors.white
@@ -180,10 +227,15 @@ class _TaxAssistantScreenState extends State<TaxAssistantScreen> {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: 100,
-                  maxHeight: MediaQuery.of(context).size.height * 0.5, // Limits content height
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
                 ),
-                child: SingleChildScrollView(
-                  child: Text(content, style: const TextStyle(fontSize: 16)),
+                child: _isLoading
+                    ? _buildLoadingContent()
+                    : Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: SingleChildScrollView(
+                    child: Text(content, style: const TextStyle(fontSize: 16)),
+                  ),
                 ),
               ),
             ],
