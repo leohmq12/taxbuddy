@@ -115,20 +115,25 @@ class _CorporateTaxScreenState extends State<CorporateTaxScreen> {
   }
 
   Widget _buildTaxSection(BuildContext context, String year, String region) {
-    // Default values
     double tax = 0.0;
     double profitAfterTax = 0.0;
     double effectiveRate = 0.0;
 
     if (_profit > 0) {
-      final calculations = CorporateTaxCalculator.calculateTax(
+      final calculations = CorporateTaxCalculator.calculate(
         region: region,
-        year: year,
-        profit: _profit,
+        taxYear: year,
+        profitBeforeTax: _profit,
       );
-      tax = calculations['tax'] as double;
-      profitAfterTax = calculations['profitAfterTax'] as double;
-      effectiveRate = calculations['effectiveRate'] as double;
+
+      // Safe extraction from string values
+      tax = double.tryParse(calculations['corporationTax'] ?? '0') ?? 0.0;
+
+      final profitBeforeTax = double.tryParse(calculations['profitBeforeTax'] ?? '0') ?? 0.0;
+      profitAfterTax = (profitBeforeTax - tax).clamp(0.0, double.infinity);
+
+      final effectiveRateStr = calculations['effectiveTaxRate']?.replaceAll('%', '');
+      effectiveRate = double.tryParse(effectiveRateStr ?? '0') ?? 0.0;
     }
 
     return Column(
@@ -147,11 +152,12 @@ class _CorporateTaxScreenState extends State<CorporateTaxScreen> {
         const SizedBox(height: 6),
         _buildTaxRow(context, 'Corporation tax', '£${tax.toStringAsFixed(2)}'),
         _buildTaxRow(context, 'Profits after tax', '£${profitAfterTax.toStringAsFixed(2)}'),
-        _buildTaxRow(context, 'Effective Tax Rate (%)', '${(effectiveRate * 100).toStringAsFixed(1)}%'),
+        _buildTaxRow(context, 'Effective Tax Rate (%)', '${effectiveRate.toStringAsFixed(1)}%'),
         const SizedBox(height: 12),
       ],
     );
   }
+
 
   Widget _buildTaxRow(BuildContext context, String label, String value) {
     return Container(

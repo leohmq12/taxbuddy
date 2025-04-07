@@ -1,85 +1,43 @@
 class CorporateTaxCalculator {
-  // Verified rates as of July 2024 (source: HMRC & Revenue Scotland)
-  static final Map<String, Map<String, List<TaxBand>>> _taxRules = {
-    'England': {
-      '2024/2025': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-      '2025/2026': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-    },
-    'Scotland': {
-      '2024/2025': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-      '2025/2026': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-    },
-    'Wales': {
-      '2024/2025': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-      '2025/2026': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-    },
-    'Northern Ireland': {
-      '2024/2025': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-      '2025/2026': [
-        TaxBand(maxProfit: 50000, rate: 0.19),
-        TaxBand(maxProfit: 250000, rate: 0.25),
-        TaxBand(maxProfit: double.infinity, rate: 0.25),
-      ],
-    },
-  };
-
-  static Map<String, dynamic> calculateTax({
+  static Map<String, dynamic> calculate({
+    required double? profitBeforeTax,
+    required String taxYear,
     required String region,
-    required String year,
-    required double profit,
   }) {
-    final bands = _taxRules[region]?[year] ?? _taxRules['England']!['2024/2025']!;
-    double remainingProfit = profit;
-    double totalTax = 0;
+    // Default to 0 if null
+    final double profit = (profitBeforeTax ?? 0).clamp(0, double.infinity);
 
-    for (final band in bands) {
-      if (remainingProfit <= 0) break;
+    // Define thresholds
+    const lowerLimit = 50000.0;
+    const upperLimit = 250000.0;
+    const mainRate = 0.25;
+    const smallProfitsRate = 0.19;
 
-      final taxableAmount = remainingProfit.clamp(0, band.maxProfit);
-      totalTax += taxableAmount * band.rate;
-      remainingProfit -= band.maxProfit;
+    double corporationTax = 0.0;
+    double marginalRelief = 0.0;
+    bool marginalReliefApplied = false;
+
+    if (profit <= lowerLimit) {
+      corporationTax = profit * smallProfitsRate;
+    } else if (profit > lowerLimit && profit <= upperLimit) {
+      corporationTax = profit * mainRate;
+      final fraction = (upperLimit - profit) / (upperLimit - lowerLimit);
+      marginalRelief = fraction * (mainRate - smallProfitsRate) * profit;
+      corporationTax -= marginalRelief;
+      marginalReliefApplied = true;
+    } else {
+      corporationTax = profit * mainRate;
     }
 
     return {
-      'tax': totalTax,
-      'profitAfterTax': profit - totalTax,
-      'effectiveRate': totalTax / profit,
-      'bands': bands,
+      'taxYear': taxYear,
+      'region': region,
+      'profitBeforeTax': profit.toStringAsFixed(2),
+      'corporationTax': corporationTax.toStringAsFixed(2),
+      'marginalReliefApplied': marginalReliefApplied,
+      'marginalRelief': marginalRelief.toStringAsFixed(2),
+      'effectiveTaxRate': (profit == 0 ? 0 : corporationTax / profit * 100)
+          .toStringAsFixed(2) + '%',
     };
   }
-}
-
-class TaxBand {
-  final double maxProfit;
-  final double rate;
-
-  TaxBand({required this.maxProfit, required this.rate});
 }
