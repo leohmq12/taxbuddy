@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:taxbuddy/backend/tax/tax_service.dart';
+import 'package:taxbuddy/backend/region/region_backend.dart';
+import 'package:provider/provider.dart';
 
 class TaxCalculatorScreen extends StatefulWidget {
   final VoidCallback? onBackToCalculator;
@@ -25,10 +27,14 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
     double annualIncome = double.tryParse(annualIncomeController.text) ?? 0;
     double selfEmploymentIncome = double.tryParse(selfEmploymentController.text) ?? 0;
 
+    final regionProvider = Provider.of<RegionProvider>(context, listen: false);
+    final selectedRegion = regionProvider.selectedRegion ?? "England";
+
     TaxCalculator taxCalculator = TaxCalculator(
       annualIncome: annualIncome,
       selfEmploymentIncome: selfEmploymentIncome,
       taxYear: selectedTaxYear,
+      region: selectedRegion,
     );
 
     setState(() {
@@ -143,7 +149,7 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
         fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none, // Remove white border in dark mode
+          borderSide: BorderSide.none,
         ),
       ),
       keyboardType: TextInputType.number,
@@ -175,7 +181,7 @@ class _TaxCalculatorScreenState extends State<TaxCalculatorScreen> {
         fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none, // Remove white border in dark mode
+          borderSide: BorderSide.none,
         ),
       ),
     );
