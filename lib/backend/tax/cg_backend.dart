@@ -6,8 +6,6 @@ class CapitalGainsTaxCalculator {
     required double purchaseCosts,
     required String taxYear,
     required String region,
-    required double taxableIncome,
-    required bool isResidential,
   }) {
     // Annual Exempt Amount (AEA)
     final annualExemptAmount = 3000.0;
@@ -17,50 +15,37 @@ class CapitalGainsTaxCalculator {
     final taxableGain = (chargeableGain - annualExemptAmount).clamp(0.0, double.infinity);
 
     // Capital Gains Tax Rates
-    final basicRate = 0.18;  // 18% for non-residential
-    final higherRate = 0.24; // 24% for non-residential
-
-    final basicOtherRate = 0.24;  // 24% for residential property
-    final higherOtherRate = 0.28; // 28% for residential property
+    final basicRate = 0.18;  // 18% for basic rate
+    final higherRate = 0.24; // 24% for higher rate
 
     // UK Basic Rate Tax Band
     final basicRateBand = 50270.0;
-    final remainingBasicBand = (basicRateBand - taxableIncome).clamp(0.0, basicRateBand) as double;
 
     // Initialize Tax Values
     double basicTax = 0.0, higherTax = 0.0;
     double basicOtherTax = 0.0, higherOtherTax = 0.0;
 
+    // We first check if taxableGain > 0 to calculate tax
     if (taxableGain > 0) {
-      if (taxableIncome < basicRateBand) {
-        // Portion taxed at basic rate, rest at higher rate
-        if (taxableGain <= remainingBasicBand) {
-          if (isResidential) {
-            basicOtherTax = taxableGain * basicOtherRate;
-          } else {
-            basicTax = taxableGain * basicRate;
-          }
-        } else {
-          double higherTaxableAmount = taxableGain - remainingBasicBand.toDouble();
-
-          if (isResidential) {
-            basicOtherTax = remainingBasicBand * basicOtherRate;
-            higherOtherTax = higherTaxableAmount * higherOtherRate;
-          } else {
-            basicTax = remainingBasicBand * basicRate;
-            higherTax = higherTaxableAmount * higherRate;
-          }
-        }
+      if (taxableGain <= basicRateBand) {
+        // Entire gain fits within the basic rate band
+        basicTax = taxableGain * basicRate;
+        basicOtherTax = taxableGain * basicRate; // Same for other assets
       } else {
-        // All taxable gain taxed at higher rate
-        if (isResidential) {
-          higherOtherTax = taxableGain * higherOtherRate;
-        } else {
-          higherTax = taxableGain * higherRate;
-        }
+        // Portion of gain falls under basic rate and the rest under higher rate
+        double higherTaxableAmount = taxableGain - basicRateBand;
+
+        // Basic tax calculation
+        basicTax = basicRateBand * basicRate;
+        basicOtherTax = basicRateBand * basicRate; // Same for other assets
+
+        // Now we apply the remaining amount to the higher tax rate
+        higherTax = higherTaxableAmount * higherRate;
+        higherOtherTax = higherTaxableAmount * higherRate; // Same for other assets
       }
     }
 
+    // Return values
     return {
       'chargeableGain': chargeableGain.toStringAsFixed(2),
       'taxableGain': taxableGain.toStringAsFixed(2),

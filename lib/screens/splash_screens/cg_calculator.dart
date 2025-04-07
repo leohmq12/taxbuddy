@@ -37,14 +37,12 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
   }
 
   void _calculate() {
-    bool isResidential = _determineIfResidential();
 
     setState(() {
       final saleProceeds = double.tryParse(_saleProceedsController.text) ?? 0;
       final purchasePrice = double.tryParse(_purchasePriceController.text) ?? 0;
       final sellingCosts = double.tryParse(_sellingCostsController.text) ?? 0;
       final purchaseCosts = double.tryParse(_purchaseCostsController.text) ?? 0;
-      final taxableIncome = double.tryParse(_taxableIncomeController.text) ?? 0;
 
       _results2024 = CapitalGainsTaxCalculator.calculate(
         saleProceeds: saleProceeds,
@@ -53,8 +51,6 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
         purchaseCosts: purchaseCosts,
         taxYear: '2024/2025',
         region: widget.selectedRegion,
-        taxableIncome: taxableIncome,
-        isResidential: isResidential,
       );
 
       _results2025 = CapitalGainsTaxCalculator.calculate(
@@ -64,15 +60,10 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
         purchaseCosts: purchaseCosts,
         taxYear: '2025/2026',
         region: widget.selectedRegion,
-        taxableIncome: taxableIncome,
-        isResidential: isResidential,
       );
     });
   }
-  bool _determineIfResidential() {
-    return selectedAssetType.toLowerCase().contains("property") ||
-        selectedAssetType.toLowerCase().contains("residence");
-  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -185,26 +176,6 @@ class _CapitalGainsTaxScreenState extends State<CapitalGainsTaxScreen> {
                 controller: _purchaseCostsController,
                 decoration: InputDecoration(
                   hintText: 'e.g. 10000',
-                  hintStyle: TextStyle(color: Theme.of(context).hintColor),
-                  border: const UnderlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (_) => _calculate(),
-              ),
-              const SizedBox (height: 16),
-              Text(
-                'Your Taxable Income',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : const Color(0xFF374151),
-                ),
-              ),
-              TextField(
-                controller: _taxableIncomeController,
-                decoration: InputDecoration(
-                  hintText: 'e.g. 40000',
                   hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: const UnderlineInputBorder(),
                 ),
