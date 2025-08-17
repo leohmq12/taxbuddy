@@ -38,7 +38,7 @@ class ChatService {
             },
             {"role": "user", "content": query},
           ],
-          "max_tokens": 1000,
+          "max_tokens": 750,
         }),
       );
 
