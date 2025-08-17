@@ -351,7 +351,7 @@ class HomeContent extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 6,
         mainAxisSpacing: 6,
-        childAspectRatio: 2.3,
+        childAspectRatio: 2.0,
       ),
       itemCount: topics.length,
       itemBuilder: (context, index) {
@@ -374,33 +374,38 @@ class HomeContent extends StatelessWidget {
 
   Widget _buildTopicCard(BuildContext context, String title, bool isDarkMode) {
     return GestureDetector(
-      onTap: () =>
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => TaxAssistantScreen(topic: title)),
-          ),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TaxAssistantScreen(topic: title),
+        ),
+      ),
       child: Container(
         width: 140,
         height: 80,
         padding: const EdgeInsets.all(12),
         alignment: Alignment.topLeft,
         decoration: BoxDecoration(
-          color: Theme
-              .of(context)
-              .cardColor,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'OakSans',
-                color: isDarkMode ? Colors.white : const Color(0xFF043377),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OakSans',
+                  color: isDarkMode ? Colors.white : const Color(0xFF043377),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(height: 5),
@@ -417,6 +422,7 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildRecentActivityCard(BuildContext context, bool isDarkMode) {
     Future<void> _openTaxDeadlineInfo() async {
