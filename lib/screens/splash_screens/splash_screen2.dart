@@ -96,22 +96,6 @@ class SecondScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 10),
-
-              // Skip Button
-              TextButton(
-                onPressed: () {
-                  print("Skip button clicked");
-                },
-                child: Text(
-                  'Skip',
-                  style: GoogleFonts.urbanist(
-                    color: const Color.fromRGBO(75, 85, 99, 1),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-
               const SizedBox(height: 30),
 
               // Progress Indicator
