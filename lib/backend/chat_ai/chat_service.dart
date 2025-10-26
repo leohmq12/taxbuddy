@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatService {
-  taxbuddy api key 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
-api: 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
 
 curl https://openrouter.ai/api/v1/chat/completions \
 
