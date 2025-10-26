@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.taxbuddy</string>
+	<string>com.taxbuddy.taxbuddy</string>
 	<key>PROJECT_ID</key>
 	<string>taxbuddy-2fd86</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:271314509016:ios:ad2ecfc48df94e9a298bad</string>
+	<string>1:271314509016:ios:8c0f92678e9cd147298bad</string>
 </dict>
 </plist>

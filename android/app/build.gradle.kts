@@ -15,7 +15,7 @@ val apiKey: String = localProperties.getProperty("apiKey") ?: ""
 
 android {
 
-    namespace = "com.example.taxbuddy"
+    namespace = "com.taxbuddy.taxbuddy"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
