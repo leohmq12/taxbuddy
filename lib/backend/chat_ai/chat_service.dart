@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatService {
-
-curl https://openrouter.ai/api/v1/chat/completions \
-
+  
 final String _apiKey = dotenv.env['API_KEY'] ?? ""; // Load API key from .env
 final String _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 
