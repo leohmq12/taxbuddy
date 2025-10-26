@@ -47,7 +47,7 @@ Future<String> _fetchAIResponse(String query) async {
           }
         ],
         "generationConfig": {
-          "maxOutputTokens": 750,
+          "maxOutputTokens": 500,
         }
       }),
     );
