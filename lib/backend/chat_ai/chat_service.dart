@@ -32,6 +32,7 @@ class ChatService {
         body: jsonEncode({
           "contents": [
             {
+              "role": "user",
               "parts": [
                 {
                   "text":
@@ -40,6 +41,7 @@ class ChatService {
               ]
             },
             {
+              "role": "user",
               "parts": [
                 {"text": query}
               ]
@@ -57,7 +59,6 @@ class ChatService {
         String chatbotResponse =
             data["candidates"][0]["content"]["parts"][0]["text"].trim();
 
-        // 🔴 REMOVE Markdown Symbols (`#`, `*`, `_`, etc.)
         chatbotResponse = chatbotResponse.replaceAll(RegExp(r'[#*_]'), '');
         return chatbotResponse;
       } else {
